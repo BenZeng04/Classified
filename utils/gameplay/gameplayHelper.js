@@ -1,5 +1,5 @@
 import {clone, game} from "./gameplay"
-import {DEFAULT_HP} from "../firebase/constants";
+import {DEFAULT_HP} from "../../constants/constants";
 /*
 Raw, User-Decisive Actions (that get pushed to database)
 

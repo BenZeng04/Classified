@@ -15,7 +15,7 @@ Step 3: Add the player to the game.
  */
 
 import {db} from "./firebase";
-import {gameStart, switchTurn} from "./constants";
+import {gameStart, switchTurn} from "../../constants/constants";
 
 /**
  * Creates a fresh new lobby.

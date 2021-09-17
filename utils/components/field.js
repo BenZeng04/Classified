@@ -1,6 +1,6 @@
 import React from "react";
 import {game, load} from "../gameplay/gameplay";
-import {COLUMNS, DEFAULT_HP, ROWS} from "../firebase/constants";
+import {COLUMNS, DEFAULT_HP, ROWS} from "../../constants/constants";
 const defaultCard = {
     name: null,
     attack: null,

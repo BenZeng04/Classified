@@ -1,6 +1,6 @@
 import {db} from "../firebase/firebase";
 import {initGame, drawCard, handOverTurn} from "./gameplayHelper";
-import {COLUMNS, gameStart, ROWS, switchTurn} from "../firebase/constants"
+import {COLUMNS, gameStart, ROWS, switchTurn} from "../../constants/constants"
 
 /**
  * Provides the set of global variables and functions corresponding to specific actions within the game.
