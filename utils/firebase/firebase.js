@@ -2,7 +2,6 @@ import firebase from "firebase/app";
 import 'firebase/firestore';
 import 'firebase/auth';
 import * as ReactDOM from "react-dom";
-import Head from "next/head";
 
 // Your web app's Firebase configuration
 // For Firebase JS SDK v7.20.0 and later, measurementId is optional
@@ -21,6 +20,7 @@ if (!firebase.apps.length) {
 }
 
 export const db = firebase.firestore();
+export const auth = firebase.auth();
 export default firebase;
 
 /**
@@ -28,6 +28,7 @@ export default firebase;
  * @param pageID
  * @param DOMElement
  */
+
 export function rerender(pageID, DOMElement) {
     ReactDOM.render(DOMElement, document.getElementById(pageID));
 }

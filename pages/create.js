@@ -1,26 +1,30 @@
+import React, {useState} from "react";
 import useFirebaseAuth, {FINISHED} from "../utils/firebase/auth";
-import {Divider, Title} from "../utils/components/utils";
+import {Divider, Error, Title} from "../utils/components/utils";
 import GlobalHeader from "../utils/components/header";
-import {auth, db} from "../utils/firebase/firebase";
-import React, {useEffect} from "react";
+import CreateGameForm from "../utils/components/createGameForm";
 
-export default function Home() {
+export default function Create() {
     const auth = useFirebaseAuth();
+    const [error, setError] = useState(null);
     if (auth.loading !== FINISHED) return null;
     if (auth.authUser == null) {
         window.location.href = "/login";
         return null;
     }
-    const msg = `Welcome Back, ${auth.userData.username}`;
     return (
         <div className={'fullscreen'}>
-            <title>Home</title>
+            <title>Create Match</title>
             <GlobalHeader authInfo={auth}/>
             <div className={'content'}>
-                <Title name={msg}/>
+                <Title name={"Create Match"}/>
                 <Divider/>
-                <p>{""}</p>
+                <CreateGameForm authInfo={auth} setError={setError}/>
+                {
+                    error == null ? <></> : <Error error={error}/>
+                }
             </div>
         </div>
+
     );
 }

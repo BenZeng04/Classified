@@ -1,0 +1,40 @@
+.form {
+    align-self: center;
+    align-items: center;
+
+    width: 20%;
+    padding: 8px;
+
+    border: #274657 solid 1px;
+    border-radius: 4px;
+
+    background: rgba(138, 219, 255, 0.2);
+    box-shadow: 0px 8px 16px 0px rgba(0, 0, 0, 0.2);
+}
+
+.error {
+    align-self: center;
+    align-items: center;
+
+    width: 20%;
+    margin: 10px;
+    padding: 8px;
+
+    border: #982727 solid 1px;
+    border-radius: 4px;
+    background: rgba(255, 56, 56, 0.2);
+    box-shadow: 0px 8px 16px 0px rgba(0, 0, 0, 0.2);
+}
+
+.top-input-offset {
+    margin-top: 15%;
+}
+
+.form > input {
+    margin-bottom: 10px;
+    width: 90%;
+}
+
+.form > .submit {
+    width: auto;
+}
