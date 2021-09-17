@@ -15,7 +15,9 @@ Step 3: Add the player to the game.
  */
 
 import {db} from "./firebase";
-import {gameStart, switchTurn} from "../../constants/constants";
+import {DECK_CAPACITY, DECK_SIZE, gameStart} from "../../constants/constants";
+import {loadCollection} from "../gameplay/gameplay";
+import {shuffle} from "../gameplay/gameplayHelper"
 
 /**
  * Creates a fresh new lobby.
@@ -31,12 +33,6 @@ export async function createLobby(matchName) {
     return lobby.id;
 }
 
-/**
- * Adds a player to a lobby, checking if said lobby is a valid lobby.
- * @param lobbyID
- * @returns {Promise<{success: boolean, message: string}>} depending on if the lobby is valid.
- */
-
 export async function startGame(lobbyID) {
     const reference = db.collection("games").doc(lobbyID);
     const lobby = await reference.get();
@@ -50,7 +46,26 @@ export async function startGame(lobbyID) {
     })
 }
 
+/**
+ * Returns a list of card IDs corresponding to {userID}'s deck.
+ * @param userID the ID of the user
+ * @returns {Promise<*[]>} The list of card IDs
+ */
+async function loadPlayerDeck(userID) {
+    const collection =  shuffle(Object.keys(await loadCollection()));
+    const deck = [];
+    for (let i = 0; i < DECK_CAPACITY; i++)
+        deck.push(collection[i]);
+    return deck;
+}
 
+
+/**
+ * Adds a player to a lobby, checking if said lobby is a valid lobby. This sets said user as one of the two players and pushes
+ * a pre-shuffled list of the cards in their deck as IDs, in order to have consistency upon game refreshes.
+ * @param lobbyID
+ * @returns {Promise<{success: boolean, message: string}>} depending on if the lobby is valid.
+ */
 export async function addPlayerToLobby(lobbyID, userID) {
     const reference = db.collection("games").doc(lobbyID);
     const lobby = await reference.get();
@@ -74,6 +89,7 @@ export async function addPlayerToLobby(lobbyID, userID) {
         });
         await reference.update({
             [`currentPlayers.${userID}`]: {
+                deck: await loadPlayerDeck(userID)
             }
         });
     }

@@ -82,7 +82,11 @@ async function processAction(action) {
 async function initGameStart(data) {
     game.self = globalAuthInfo.authUser.uid;
     game.firstPlayer = data.firstPlayer;
-
+    const deckID = data.currentPlayers[game.self].deck;
+    for (let i = 0; i < deckID.length; i++) {
+        const cardID = deckID[i];
+        game.deck.push(game.collection[cardID]);
+    }
     const players = data.currentPlayers;
     for (const player in players) {
         if (player !== game.self) {
@@ -90,6 +94,11 @@ async function initGameStart(data) {
         }
     }
     initGame();
+}
+
+export async function loadCollection() {
+    const collectionRef = await db.collection("games").doc("global-cards").get();
+    return collectionRef.data();
 }
 
 /**
@@ -102,9 +111,8 @@ async function initGameStart(data) {
  */
 export async function load(authInfo, startGame) {
     globalAuthInfo = authInfo;
+    game.collection = await loadCollection();
     const docRef = await db.collection("games").doc(authInfo.currentMatchID).get();
-    const collectionRef = await db.collection("games").doc("global-cards").get();
-    game.collection = collectionRef.data();
     const started = await reload(docRef.data());
 
     if (started) startGame();

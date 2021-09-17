@@ -4,19 +4,11 @@ import {DEFAULT_HP} from "../../constants/constants";
 Raw, User-Decisive Actions (that get pushed to database)
 
  */
-function shuffle(arr) {
+export function shuffle(arr) {
     return arr
         .map((value) => ({ value, sort: Math.random() }))
         .sort((a, b) => a.sort - b.sort)
         .map(({ value }) => value);
-}
-function loadDeck() {
-    // Just draw from collection for now
-    const keys = shuffle(Object.keys(game.collection));
-    for (let i = 0; i < 8; i++) {
-        const card = game.collection[keys[i]];
-        game.deck.push(clone(card));
-    }
 }
 
 /**
@@ -71,7 +63,7 @@ export function initGame() {
         [self]: 0,
         [opp]: 0
     }
-    loadDeck();
+
     // Draws 2 cards at start of game
     drawCard(game.self);
     drawCard(game.self);

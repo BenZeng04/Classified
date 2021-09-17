@@ -105,20 +105,25 @@ function draw(p5) {
         // Banner for Name
         p5.strokeWeight(3);
 
-        const nameSize = 26;
-        const nameOffset = 36;
+        const nameSize = 22;
+        const nameOffset = 30;
         const moneyDisplaySize = 50;
         p5.textSize(nameSize);
-        const nameHeight = Math.ceil(p5.textWidth(card.name) / (cardSize - gridWidth)) * nameOffset;
+
+        const nameHeight = Math.ceil(p5.textWidth(card.name) / cardSize) * nameOffset;
+
         p5.fill('rgba(255,0,0,0.75)');
+
         p5.rect(x, y - nameOffset, cardSize, nameHeight);
 
         // Cost of Card
         p5.strokeWeight(4);
         p5.ellipse(x, y + cardSize / 2 - gridWidth, moneyDisplaySize, moneyDisplaySize);
 
-        const iconSize = 30;
-        const downOffset = gridTileSize * 3 / 20;
+        const iconSize = 36;
+        const bottomOfName = (nameHeight) / 2 - nameOffset;
+        const topOfEllipse = cardSize / 2 - gridWidth - moneyDisplaySize / 2;
+        const downOffset = (bottomOfName + topOfEllipse) / 2;
         p5.image(atk, x - (gridTileSize * 3 / 8), y + downOffset, iconSize, iconSize);
         p5.image(hp, x - (gridTileSize / 8), y + downOffset, iconSize, iconSize);
         p5.image(mvt, x + (gridTileSize / 8), y + downOffset, iconSize, iconSize);
@@ -268,6 +273,7 @@ function draw(p5) {
 
 function mouseClicked(event) {
     if (!game.started) return;
+    const x = event.offsetX, y = event.offsetY;
 }
 
 function keyPressed(event) {
@@ -291,10 +297,13 @@ class Field extends React.Component {
     render() {
         const Sketch = require("react-p5");
         return <div style={{
-            transformOrigin: `0 0`,
-            transform: `scale(${0.825 * innerWidth / width})`
-        }} id={"sketch"} tabIndex='8'>
-            <Sketch preload={preload} setup={setup} draw={draw}/>
+            height: '100%',
+            width: '100%',
+           }} id={"sketch"} tabIndex='8'>
+            <Sketch style={{
+                transformOrigin: `0 0`,
+                transform: `scale(${0.825 * innerWidth / width})`,
+            }} preload={preload} setup={setup} draw={draw}/>
         </div>;
     }
 }

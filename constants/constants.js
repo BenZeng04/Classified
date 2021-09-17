@@ -1,4 +1,5 @@
 export const DEFAULT_HP = 50;
+export const DECK_CAPACITY = 8;
 export const COLUMNS = 5, ROWS = 6;
 export const gameStart = 0;
 export const switchTurn = 1;
