@@ -1,5 +1,5 @@
 import {useEffect, useState} from 'react'
-import {auth, db} from './Firebase';
+import {auth, db} from '../firebase/firebase'
 
 export const NOT_STARTED = true;
 export const FINISHED = false;
