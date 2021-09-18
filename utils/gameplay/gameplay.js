@@ -1,7 +1,30 @@
 import {db} from "../firebase/firebase";
 import {initGame, drawCard, handOverTurn} from "./gameplayHelper";
 import {COLUMNS, gameStart, ROWS, switchTurn} from "../../constants/constants"
+import {processAction} from "../actions/animation";
 
+/**
+ * Terminology
+ *
+ * ACTION: an event that directly modifies the game state and can be replicable using only the information
+ * stored within such action.
+ *
+ * REQUEST: A flag after an action that indicates that one of the two users must follow a specific set of inputs before proceeding.
+ * Requests will be stored in the database as a type of action and will have a completed and uncompleted state, such that the user can still proceed even if
+ * they refresh their client.
+ *
+ * LOCAL REQUEST: A request that occurs purely on the client and does not require a completion, such as opening the UI for moving, placing cards, etc.
+ *
+ * Since Actions happen spontaneously without additional input, they are synchronous with the rest of the program.
+ *
+ * Both types of requests will have onSuccessListeners on the client which trigger an event upon successful completion. In the case that a
+ * local request gets cancelled, the request will not be considered a success.
+ *
+ * Actions, Requests, and Local Requests happen synchronously relative to each other in the client and will only start once the previous "event" has
+ * FULLY been resolved. This includes animations, user inputs, and anything else that may temporarily halt the normal gameplay flow.
+ *
+ * To simplify the first stable release, only local requests will be part of the program.
+ */
 /**
  * Provides the set of global variables and functions corresponding to specific actions within the game.
  * Updates global variables and the database accordingly.
@@ -43,7 +66,15 @@ export function clone(obj) {
     return JSON.parse(JSON.stringify(obj))
 }
 
-async function reload(data) {
+/**
+ * Checks over the new data snapshot and updates if there are any unprocessed events in the action queue.
+ * Loading events from the queue will never require user input.
+ *
+ * @param data
+ * @param preload Whether or not the action is being preloaded at the beginning of the game; this determines whether an animation should occur.
+ * @returns {Promise<boolean>}
+ */
+async function reload(data, preload = false) {
     const actions = data.actionQueue;
 
     let started = false;
@@ -54,25 +85,10 @@ async function reload(data) {
             started = true;
         }
 
-        await processAction(action);
+        await processAction(action, preload);
         queueProcessIndex++;
     }
     return started;
-}
-
-/**
- * Updates local game variables based on the most recent action dispatched to the action queue.
- * It is assumed that the order that this function is called will be the order that the actions occurred in real time.
- * @param action the action
- * @returns {Promise<void>}
- */
-async function processAction(action) {
-    switch (action.type) {
-        case switchTurn: {
-            handOverTurn(action.user);
-            break;
-        }
-    }
 }
 
 /**
@@ -113,7 +129,7 @@ export async function load(authInfo, startGame) {
     globalAuthInfo = authInfo;
     game.collection = await loadCollection();
     const docRef = await db.collection("games").doc(authInfo.currentMatchID).get();
-    const started = await reload(docRef.data());
+    const started = await reload(docRef.data(), true);
 
     if (started) startGame();
 

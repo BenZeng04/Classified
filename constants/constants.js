@@ -9,6 +9,7 @@ export const cardAttacked = 4;
 
 
 /*
+
 Idea for attacks:
 
 calculateCardStats = {

@@ -1,5 +1,6 @@
 import {clone, game} from "./gameplay"
 import {DEFAULT_HP} from "../../constants/constants";
+import {processAction} from "../actions/animation";
 /*
 Raw, User-Decisive Actions (that get pushed to database)
 
@@ -69,7 +70,5 @@ export function initGame() {
     drawCard(game.self);
     drawCard(game.opp);
     drawCard(game.opp);
-    handOverTurn(game.firstPlayer);
-
     game.started = true;
 }

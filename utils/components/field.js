@@ -1,6 +1,8 @@
 import React from "react";
 import {game, load} from "../gameplay/gameplay";
 import {COLUMNS, DEFAULT_HP, ROWS} from "../../constants/constants";
+import {handleEvent} from "../actions/animation";
+
 const defaultCard = {
     name: null,
     attack: null,
@@ -14,9 +16,31 @@ const defaultCard = {
     abilityListener: null,
     owner: null,
 } // Purely here for referencing and preventing IDE confusion
-const width = 2000;
-const height = 1100;
+export const width = 2000;
+export const height = 1100;
+export const shadowOffset = {
+    small: 2,
+    normal: 3,
+    big: 4
+}
+export const colour = (p5, stroke, fill) => {
+    p5.stroke(stroke);
+    p5.fill(fill);
+}
+export const shadowText = (p5, text, x, yAbsolute, size, boxWidth = null) => {
+    p5.noStroke();
+    p5.textSize(size);
 
+    const shadow = size / 16;
+    const y = yAbsolute - size / 8; // Adjusting for the text offset
+    p5.fill(127);
+    if (boxWidth != null) p5.text(text, x + shadow, y + shadow, boxWidth, boxWidth);
+    else p5.text(text, x + shadow, y + shadow);
+
+    p5.fill(255)
+    if (boxWidth != null) p5.text(text, x, y, boxWidth, boxWidth);
+    else p5.text(text, x, y);
+}
 
 /**
  * !important
@@ -47,36 +71,12 @@ function draw(p5) {
     p5.background(bg);
     p5.smooth();
 
-    const shadowOffset = {
-        small: 2,
-        normal: 3,
-        big: 4
-    }
-
     const gridOffset = 40;
     const gridTileSize = 150;
     const gridWidth = 10;
 
-    const colour = (stroke, fill) => {
-        p5.stroke(stroke);
-        p5.fill(fill);
-    }
-    const shadowText = (text, x, yAbsolute, size, boxWidth = null) => {
-        p5.noStroke();
-        p5.textSize(size);
-
-        const y = yAbsolute - 4; // Adjusting for the text offset
-        p5.fill(127);
-        if (boxWidth != null) p5.text(text, x + shadowOffset.small, y + shadowOffset.small, boxWidth, boxWidth);
-        else p5.text(text, x + shadowOffset.small, y + shadowOffset.small);
-
-        p5.fill(255)
-        if (boxWidth != null) p5.text(text, x, y, boxWidth, boxWidth);
-        else p5.text(text, x, y);
-    }
     const gameGrid = (fill, offset) => {
         const offsetStartX = gridOffset + offset, offsetStartY = (height - gridTileSize * ROWS) / 2 + offset;
-
         p5.noStroke();
         p5.rectMode(p5.CORNER);
         p5.fill(fill);
@@ -129,13 +129,13 @@ function draw(p5) {
         p5.image(mvt, x + (gridTileSize / 8), y + downOffset, iconSize, iconSize);
         p5.image(rng, x + (gridTileSize * 3 / 8), y + downOffset, iconSize, iconSize);
 
-        shadowText(card.name, x, y - nameOffset, nameSize, cardSize);
-        shadowText(`$${card.cost}`, x, y + cardSize / 2 - gridWidth, nameSize)
+        shadowText(p5, card.name, x, y - nameOffset, nameSize, cardSize);
+        shadowText(p5, `$${card.cost}`, x, y + cardSize / 2 - gridWidth, nameSize)
 
-        shadowText(card.attack, x - (gridTileSize * 3 / 8), y + downOffset, nameSize);
-        shadowText(card.health, x - (gridTileSize / 8), y + downOffset, nameSize);
-        shadowText(card.movement, x + (gridTileSize / 8), y + downOffset, nameSize);
-        shadowText(card.range, x + (gridTileSize * 3 / 8), y + downOffset, nameSize);
+        shadowText(p5, card.attack, x - (gridTileSize * 3 / 8), y + downOffset, nameSize);
+        shadowText(p5, card.health, x - (gridTileSize / 8), y + downOffset, nameSize);
+        shadowText(p5, card.movement, x + (gridTileSize / 8), y + downOffset, nameSize);
+        shadowText(p5, card.range, x + (gridTileSize * 3 / 8), y + downOffset, nameSize);
     }
     // Returns the centre of a card on the field
     const fieldPositionToCoordinate = (col, row) => {
@@ -191,24 +191,24 @@ function draw(p5) {
         p5.image(hp, midX - defWidth / 2 - iconOffset, midY, iconSize, iconSize)
 
         p5.textAlign(p5.CENTER, p5.CENTER);
-        shadowText(`${currHP} / ${maxHP}`, midX - defWidth / 2 - iconOffset, midY - 1, 16)
+        shadowText(p5, `${currHP} / ${maxHP}`, midX - defWidth / 2 - iconOffset, midY - 1, 16)
 
         p5.rectMode(p5.CENTER);
 
         // Displaying the player's cash
         p5.strokeWeight(2);
-        colour(127, 127);
+        colour(p5, 127, 127);
         p5.rect(midX + defWidth / 2 + iconOffset, midY, iconSize, iconSize, 5);
 
-        colour('#ffeabd', 'rgba(255,211,25,0.7)');
+        colour(p5, '#ffeabd', 'rgba(255,211,25,0.7)');
         p5.rect(midX + defWidth / 2 + iconOffset, midY, iconSize, iconSize, 5);
 
         p5.textAlign(p5.CENTER, p5.CENTER);
-        shadowText(`$${cash}`, midX + defWidth / 2 + iconOffset, midY, 26);
+        shadowText(p5, `$${cash}`, midX + defWidth / 2 + iconOffset, midY, 26);
 
         // Displaying additional vanity text
         p5.textAlign(p5.CENTER, p5.CENTER);
-        shadowText(text, midX, midY, 28);
+        shadowText(p5, text, midX, midY, 28);
     }
 
     hpBar(DEFAULT_HP, game.hp[game.self], game.cash[game.self],
@@ -244,8 +244,6 @@ function draw(p5) {
 
     verticalDivider(handDivider);
 
-    effectiveBorder();
-
     // Now onto the displaying of the hand
 
     const handIndexToCoordinate = (index) => {
@@ -269,6 +267,12 @@ function draw(p5) {
 
     for (let i = 0; i < game.hand.length; i++)
         displayCardInHand(game.hand[i], i);
+
+
+    // KEEP THESE AT THE VERY END
+    effectiveBorder();
+    handleEvent(p5); // Handles any ongoing game-state related events in the queue on a one-event-per-frame basis
+
 }
 
 function mouseClicked(event) {
@@ -301,6 +305,8 @@ class Field extends React.Component {
             width: '100%',
            }} id={"sketch"} tabIndex='8'>
             <Sketch style={{
+                height: '100%',
+                width: '100%',
                 transformOrigin: `0 0`,
                 transform: `scale(${0.825 * innerWidth / width})`,
             }} preload={preload} setup={setup} draw={draw}/>

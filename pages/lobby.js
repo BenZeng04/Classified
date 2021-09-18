@@ -7,6 +7,7 @@ import {db} from "../utils/firebase/firebase";
 
 
 export default function Lobby() {
+
     const auth = useFirebaseAuth();
     const [gameStarted, setGameStarted] = useState(false);
     if (auth.loading !== FINISHED) return null;

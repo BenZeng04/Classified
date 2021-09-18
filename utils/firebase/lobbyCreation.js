@@ -15,7 +15,7 @@ Step 3: Add the player to the game.
  */
 
 import {db} from "./firebase";
-import {DECK_CAPACITY, DECK_SIZE, gameStart} from "../../constants/constants";
+import {DECK_CAPACITY, DECK_SIZE, gameStart, switchTurn} from "../../constants/constants";
 import {loadCollection} from "../gameplay/gameplay";
 import {shuffle} from "../gameplay/gameplayHelper"
 
@@ -43,6 +43,10 @@ export async function startGame(lobbyID) {
         [`actionQueue.0`]: {
             type: gameStart
         },
+        [`actionQueue.1`]: {
+            type: switchTurn,
+            user: firstPlayer
+        }
     })
 }
 
