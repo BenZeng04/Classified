@@ -1,35 +1,40 @@
 import {ACTIONS} from "../../../constants/constants";
 import {Queue} from "../../queue"
-import {Renderer, ClassifiedRenderer} from "../graphics/renderer";
-import {width, height} from "../graphics/renderer";
 import {Animation, SpontaneousEvent} from "../graphics/animation";
 
 const maxToHandle = 7500;
+
 // TODO: Figure out a way to actually append the new graphic methods to p5 rather than having a separate wrapper class
 export class ActionHandler {
 
-    get game() {
-        return this._game;
-    }
-    set game(value) {
-        this._game = value;
-    }
-    get eventQueue() {
-        return this._eventQueue;
-    }
-    get currentEvent() {
-        return this._currentEvent;
-    }
-    set currentEvent(value) {
-        this._currentEvent = value;
-    }
-    pushEvent(evt) {
-        this.eventQueue.add(evt);
-    }
     constructor(game) {
         this._game = game;
         this._eventQueue = new Queue(maxToHandle);
         this._currentEvent = null;
+    }
+
+    get game() {
+        return this._game;
+    }
+
+    set game(value) {
+        this._game = value;
+    }
+
+    get eventQueue() {
+        return this._eventQueue;
+    }
+
+    get currentEvent() {
+        return this._currentEvent;
+    }
+
+    set currentEvent(value) {
+        this._currentEvent = value;
+    }
+
+    pushEvent(evt) {
+        this.eventQueue.add(evt);
     }
 
     /**
@@ -45,6 +50,7 @@ export class ActionHandler {
             if (resolved) this.currentEvent = null;
         }
     }
+
     processAction(action, preload = false) {
         switch (action.type) {
             case ACTIONS.switchTurn: {

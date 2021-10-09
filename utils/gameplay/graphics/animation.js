@@ -36,6 +36,14 @@ export class SpontaneousEvent extends SynchronousEvent {
 
 export class Animation extends SynchronousEvent {
 
+    constructor(duration, onAnimationEnd, render) {
+        super();
+        this.maxDuration = duration;
+        this.durationPassed = 0;
+        this.onAnimationEnd = onAnimationEnd;
+        this.render = render;
+    }
+
     static createAnimation(action, game, onCompleteEvent) {
         switch (action.type) {
             case ACTIONS.switchTurn: {
@@ -81,13 +89,6 @@ export class Animation extends SynchronousEvent {
                 });
             }
         }
-    }
-    constructor(duration, onAnimationEnd, render) {
-        super();
-        this.maxDuration = duration;
-        this.durationPassed = 0;
-        this.onAnimationEnd = onAnimationEnd;
-        this.render = render;
     }
 
     handle(p5) {

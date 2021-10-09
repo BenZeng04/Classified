@@ -15,7 +15,7 @@ Step 3: Add the player to the game.
  */
 
 import {db} from "./firebase";
-import {DECK_CAPACITY, ACTIONS} from "../../constants/constants";
+import {ACTIONS, DECK_CAPACITY} from "../../constants/constants";
 import {GameLoader} from "../gameplay/database/gameLoader";
 
 /**
@@ -61,6 +61,7 @@ async function loadPlayerDeck(userID) {
             .sort((a, b) => a.sort - b.sort)
             .map(({value}) => value);
     }
+
     const collection = shuffle(Object.keys(await GameLoader.loadCollection()));
     const deck = [];
     for (let i = 0; i < DECK_CAPACITY; i++)

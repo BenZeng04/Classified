@@ -1,5 +1,6 @@
 import {COLUMNS, DEFAULT_HP, ROWS} from "../../../constants/constants";
 import {Card} from "./card"
+
 export class GameState {
     get collection() {
         return this._collection;
@@ -96,6 +97,7 @@ export class GameState {
     set field(value) {
         this._field = value;
     }
+
     /**
      * Default loader for initialization of the game.
      * @param {Object<String>} collection The collection of cards that are read from in order to handle actions in the game.

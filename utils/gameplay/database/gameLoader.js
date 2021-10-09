@@ -1,6 +1,7 @@
 import {db} from "../../firebase/firebase";
 import {ACTIONS} from "../../../constants/constants";
 import {Card} from "../states/card"
+
 /**
  * Wrapper class that initially loads data from the database and periodically fires events whenever an action occurs.
  * Accepts a parameter for an unloaded GameState instance that it will update by reference.
@@ -9,36 +10,6 @@ export class GameLoader {
 
     queueProcessIndex = 0;
     hasStarted = false;
-
-    get gameState() {
-        return this._gameState;
-    }
-    /**
-     *
-     * @param {GameState} value
-     */
-    set gameState(value) {
-        this._gameState = value;
-    }
-    get authInfo() {
-        return this._authInfo;
-    }
-
-    set authInfo(value) {
-        this._authInfo = value;
-    }
-
-    onGameStart(value) {
-        this._onGameStart = value;
-    }
-
-    get gameActionHandler() {
-        return this._gameActionHandler;
-    }
-
-    set gameActionHandler(value) {
-        this._gameActionHandler = value;
-    }
 
     /**
      * @param {Object} authInfo
@@ -52,9 +23,37 @@ export class GameLoader {
         this._gameActionHandler = gameActionHandler;
     }
 
+    get gameState() {
+        return this._gameState;
+    }
+
+    /**
+     *
+     * @param {GameState} value
+     */
+    set gameState(value) {
+        this._gameState = value;
+    }
+
+    get authInfo() {
+        return this._authInfo;
+    }
+
+    set authInfo(value) {
+        this._authInfo = value;
+    }
+
+    get gameActionHandler() {
+        return this._gameActionHandler;
+    }
+
+    set gameActionHandler(value) {
+        this._gameActionHandler = value;
+    }
+
     static async loadCollection() {
         const collectionRef = await db.collection("games").doc("global-cards").get();
-        const data =  collectionRef.data();
+        const data = collectionRef.data();
         const collection = {};
         for (const cardID in data) {
             const current = data[cardID];
@@ -71,10 +70,14 @@ export class GameLoader {
         return collection;
     }
 
+    onGameStart(value) {
+        this._onGameStart = value;
+    }
+
     loadAndListen() {
         db.collection("games").doc(this.authInfo.currentMatchID).get().then(async (data) => {
             const collection = await GameLoader.loadCollection();
-            this.reload(data.data(), collection,true);
+            this.reload(data.data(), collection, true);
             db.collection("games").doc(this.authInfo.currentMatchID).onSnapshot(async (updatedData) => {
                 this.reload(updatedData.data(), collection);
             })

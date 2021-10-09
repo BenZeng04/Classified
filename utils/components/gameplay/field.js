@@ -3,8 +3,7 @@ import React from "react";
 import {ActionHandler} from "../../gameplay/actions/actionHandler";
 import {GameState} from "../../gameplay/states/gameState";
 import {GameLoader} from "../../gameplay/database/gameLoader";
-import {Renderer} from "../../gameplay/graphics/renderer";
-import {width, height} from "../../gameplay/graphics/renderer";
+import {Renderer, width} from "../../gameplay/graphics/renderer";
 
 /**
  * !important
@@ -45,7 +44,8 @@ class Field extends React.Component {
                     width: '100%',
                     transformOrigin: `0 0`,
                     transform: `scale(${0.825 * innerWidth / width})`,
-                }} preload={(p5) => graphics.preload(p5)} setup={(p5, cpr) => graphics.setup(p5, cpr)} draw={(p5) => graphics.draw(p5)}/>
+                }} preload={(p5) => graphics.preload(p5)} setup={(p5, cpr) => graphics.setup(p5, cpr)}
+                        draw={(p5) => graphics.draw(p5)}/>
             </div>;
         } else {
             return <></>;
