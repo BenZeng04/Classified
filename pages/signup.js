@@ -2,7 +2,7 @@ import React, {useState} from "react";
 import useFirebaseAuth, {FINISHED} from "../utils/firebase/auth";
 import {Divider, Error, Title} from "../utils/components/utils";
 import GlobalHeader from "../utils/components/header";
-import SignupForm from "../utils/components/signupForm";
+import SignupForm from "../utils/components/forms/signupForm";
 
 export default function SignUp() {
     const authState = useFirebaseAuth();

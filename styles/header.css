@@ -1,4 +1,5 @@
 .header {
+
     display: flex;
     align-items: center;
     flex-direction: row;
@@ -14,6 +15,7 @@
 }
 
 .header > .item {
+    transition: 0.2s;
     display: flex;
     align-items: center;
 
@@ -100,5 +102,5 @@
 }
 
 .header > a:hover {
-    background: #366177;
+    background: #406d85;
 }

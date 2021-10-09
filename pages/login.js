@@ -1,6 +1,6 @@
 import React, {useState} from "react";
 import useFirebaseAuth, {FINISHED} from "../utils/firebase/auth";
-import LoginForm from "../utils/components/loginForm";
+import LoginForm from "../utils/components/forms/loginForm";
 import {Divider, Error, Title} from "../utils/components/utils";
 import GlobalHeader from "../utils/components/header";
 

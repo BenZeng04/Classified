@@ -1,6 +1,5 @@
 import React from "react";
-import {db} from "../firebase/firebase";
-import {addPlayerToLobby, createLobby} from "../firebase/lobbyCreation";
+import {addPlayerToLobby, createLobby} from "../../firebase/lobbyCreation";
 
 
 class CreateGameForm extends React.Component {

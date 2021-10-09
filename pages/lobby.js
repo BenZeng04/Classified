@@ -1,13 +1,11 @@
 import useFirebaseAuth, {FINISHED} from "../utils/firebase/auth";
 import {Divider, Error, Title} from "../utils/components/utils";
-import Field from "../utils/components/field"
+import Field from "../utils/components/gameplay/field"
 import GlobalHeader from "../utils/components/header";
-import {useEffect, useState} from "react";
-import {db} from "../utils/firebase/firebase";
+import {useState} from "react";
 
 
 export default function Lobby() {
-
     const auth = useFirebaseAuth();
     const [gameStarted, setGameStarted] = useState(false);
     if (auth.loading !== FINISHED) return null;
@@ -27,7 +25,8 @@ export default function Lobby() {
                 <Title name={`${auth.matchData.matchName} | Match Code: ${auth.currentMatchID}`}/>
                 <Divider/>
                 {
-                    !gameStarted? <Error error={"Waiting for game to start... (Make sure you've sent the match code to someone!)"}/>: <></>
+                    !gameStarted ? <Error
+                        error={"Waiting for game to start... (Make sure you've sent the match code to someone!)"}/> : <></>
                 }
                 <Field authInfo={auth} startGame={() => setGameStarted(true)}/>
             </div>

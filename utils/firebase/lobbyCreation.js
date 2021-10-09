@@ -15,9 +15,8 @@ Step 3: Add the player to the game.
  */
 
 import {db} from "./firebase";
-import {DECK_CAPACITY, DECK_SIZE, gameStart, switchTurn} from "../../constants/constants";
-import {loadCollection} from "../gameplay/gameplay";
-import {shuffle} from "../gameplay/gameplayHelper"
+import {DECK_CAPACITY, ACTIONS} from "../../constants/constants";
+import {GameLoader} from "../gameplay/database/gameLoader";
 
 /**
  * Creates a fresh new lobby.
@@ -41,10 +40,10 @@ export async function startGame(lobbyID) {
     await reference.update({
         firstPlayer: firstPlayer,
         [`actionQueue.0`]: {
-            type: gameStart
+            type: ACTIONS.gameStart
         },
         [`actionQueue.1`]: {
-            type: switchTurn,
+            type: ACTIONS.switchTurn,
             user: firstPlayer
         }
     })
@@ -56,7 +55,13 @@ export async function startGame(lobbyID) {
  * @returns {Promise<*[]>} The list of card IDs
  */
 async function loadPlayerDeck(userID) {
-    const collection =  shuffle(Object.keys(await loadCollection()));
+    function shuffle(arr) {
+        return arr
+            .map((value) => ({value, sort: Math.random()}))
+            .sort((a, b) => a.sort - b.sort)
+            .map(({value}) => value);
+    }
+    const collection = shuffle(Object.keys(await GameLoader.loadCollection()));
     const deck = [];
     for (let i = 0; i < DECK_CAPACITY; i++)
         deck.push(collection[i]);
@@ -68,6 +73,7 @@ async function loadPlayerDeck(userID) {
  * Adds a player to a lobby, checking if said lobby is a valid lobby. This sets said user as one of the two players and pushes
  * a pre-shuffled list of the cards in their deck as IDs, in order to have consistency upon game refreshes.
  * @param lobbyID
+ * @param userID
  * @returns {Promise<{success: boolean, message: string}>} depending on if the lobby is valid.
  */
 export async function addPlayerToLobby(lobbyID, userID) {

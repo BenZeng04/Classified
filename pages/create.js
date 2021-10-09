@@ -2,7 +2,7 @@ import React, {useState} from "react";
 import useFirebaseAuth, {FINISHED} from "../utils/firebase/auth";
 import {Divider, Error, Title} from "../utils/components/utils";
 import GlobalHeader from "../utils/components/header";
-import CreateGameForm from "../utils/components/createGameForm";
+import CreateGameForm from "../utils/components/forms/createGameForm";
 
 export default function Create() {
     const auth = useFirebaseAuth();

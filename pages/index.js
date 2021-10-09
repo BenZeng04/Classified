@@ -1,8 +1,7 @@
 import useFirebaseAuth, {FINISHED} from "../utils/firebase/auth";
 import {Divider, Title} from "../utils/components/utils";
 import GlobalHeader from "../utils/components/header";
-import {auth, db} from "../utils/firebase/firebase";
-import React, {useEffect} from "react";
+import React from "react";
 
 export default function Home() {
     const auth = useFirebaseAuth();

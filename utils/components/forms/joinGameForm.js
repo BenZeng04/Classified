@@ -1,6 +1,5 @@
 import React from "react";
-import {db} from "../firebase/firebase";
-import {addPlayerToLobby} from "../firebase/lobbyCreation";
+import {addPlayerToLobby} from "../../firebase/lobbyCreation";
 
 
 class JoinGameForm extends React.Component {
@@ -15,11 +14,11 @@ class JoinGameForm extends React.Component {
         event.preventDefault();
         const authInfo = this.props.authInfo;
         addPlayerToLobby(this.state.gameID, authInfo.authUser.uid).then((res) => {
-           if (res.success) {
-               window.location.replace("/lobby");
-           } else {
-               this.props.setError(res.message);
-           }
+            if (res.success) {
+                window.location.replace("/lobby");
+            } else {
+                this.props.setError(res.message);
+            }
         });
     }
 

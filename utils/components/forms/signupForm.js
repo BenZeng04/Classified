@@ -1,5 +1,5 @@
 import React from "react";
-import {auth, db} from "../firebase/firebase";
+import {auth, db} from "../../firebase/firebase";
 
 
 class SignupForm extends React.Component {

@@ -2,7 +2,7 @@ import React, {useState} from "react";
 import useFirebaseAuth, {FINISHED} from "../utils/firebase/auth";
 import {Divider, Error, Title} from "../utils/components/utils";
 import GlobalHeader from "../utils/components/header";
-import JoinGameForm from "../utils/components/joinGameForm";
+import JoinGameForm from "../utils/components/forms/joinGameForm";
 
 export default function Join() {
     const auth = useFirebaseAuth();
