@@ -102,7 +102,7 @@ export class GameLoader {
             }
 
             // Processes a generic action
-            this.gameActionHandler.processAction(action, true);
+            this.gameActionHandler.processAction(action, preload);
             // Flags the action as processed
             this.queueProcessIndex++;
         }

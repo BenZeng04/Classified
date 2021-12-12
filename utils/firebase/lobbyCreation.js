@@ -84,7 +84,7 @@ export async function addPlayerToLobby(lobbyID, userID) {
         success: false,
         message: "Invalid Lobby ID!"
     };
-    var gameInit = false;
+    let gameInit = false;
     if (!lobby.data().currentPlayers.hasOwnProperty(userID)) {
         if (lobby.data().currentPlayerCount === 1) {
             gameInit = true;

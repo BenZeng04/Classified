@@ -42,19 +42,22 @@ export class ActionHandler {
      * @param p5
      */
     render(p5) {
-        if (this.currentEvent == null && !this.eventQueue.isEmpty()) {
-            this.currentEvent = this.eventQueue.poll();
-        }
-        if (this.currentEvent != null) {
-            const resolved = this.currentEvent.handle(p5);
-            if (resolved) this.currentEvent = null;
+        while (true) {
+            if (this.currentEvent == null && !this.eventQueue.isEmpty()) {
+                this.currentEvent = this.eventQueue.poll();
+            }
+            // Loop is so that multiple spontaneous events get handled instantly rather than once-per-frame
+            if (this.currentEvent != null) {
+                const resolved = this.currentEvent.handle(p5);
+                if (resolved) this.currentEvent = null;
+                else break;
+            } else break;
         }
     }
 
     hasPendingEvents() {
         return !this.eventQueue.isEmpty() || this.currentEvent != null;
     }
-
 
     processAction(action, preload = false) {
         switch (action.type) {
