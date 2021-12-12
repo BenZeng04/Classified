@@ -1,5 +1,5 @@
 import {ACTIONS} from "../../../constants/constants";
-import {height, width} from "./renderer";
+import {height, width} from "./classifiedSketch";
 
 /**
  * A Helper class to handle synchronous events that occur on a per-frame basis.

@@ -1,4 +1,4 @@
-import {COLUMNS, DEFAULT_HP, ROWS} from "../../../constants/constants";
+import {ACTIONS, COLUMNS, DEFAULT_HP, ROWS} from "../../../constants/constants";
 
 export const width = 2000;
 export const height = 1100;
@@ -204,15 +204,27 @@ export class ClassifiedRenderer {
             p5.stroke('#FFFFFF');
             p5.rect(0, 0, width, height);
         }
+        p5.button = (x, y, xLen, yLen, colour, text) => {
+            p5.rectMode(p5.CORNER);
+            p5.strokeWeight(5);
+            p5.fill(colour);
+            p5.stroke('#FFFFFF');
+
+            p5.rect(x, y, xLen, yLen, 10, 10);
+            p5.textAlign(p5.CENTER, p5.CENTER);
+            p5.shadowText(text, x + xLen / 2, y + yLen / 2, 40);
+        }
     }
 }
 
 
-export class Renderer {
+export class ClassifiedSketch {
 
-    constructor(game, handler) {
+    constructor(game, handler, loader) {
         this.game = game;
         this.handler = handler;
+        this.loader = loader;
+
     }
 
     preload(p5) {
@@ -226,10 +238,10 @@ export class Renderer {
 
     setup(p5, canvasParentRef) {
         p5.createCanvas(width, height).parent(canvasParentRef).mouseClicked((a) => this.mouseClicked(a));
+        ClassifiedRenderer.attachGraphics(p5);
     }
 
     draw(p5) {
-        ClassifiedRenderer.attachGraphics(p5);
         p5.textFont(icons.font);
         p5.imageMode(p5.CORNER);
         p5.background(icons.bg);
@@ -259,13 +271,27 @@ export class Renderer {
         for (let i = 0; i < this.game.hand.length; i++)
             p5.displayCardInHand(this.game.hand[i], i);
 
+        const colour = this.game.hasTurn? 'rgba(171,128,232,0.86)': 'rgba(192,192,192,0.66)';
+        const msg = this.game.hasTurn? 'Switch Turn!': "Opponent's Turn!";
+        p5.button(handDivider + gridOffset, cardSize * 0.75, width - handDivider - gridOffset * 2, cardSize * 0.75, colour, msg);
 
         // KEEP THESE AT THE VERY END
         p5.effectiveBorder();
         this.handler.render(p5); // Handles any ongoing game-state related events in the queue on a one-event-per-frame basis
     }
 
-    mouseClicked(event) {
+    rectCollision(mx, my, rx, ry, rw, rh) {
+        return mx >= rx && mx <= rx + rw && my >= ry && my <= ry + rh;
+    }
 
+    mouseClicked(event) {
+        if (this.handler.hasPendingEvents()) return;
+
+        if (this.rectCollision(event.offsetX, event.offsetY, handDivider + gridOffset, cardSize * 0.75, width - handDivider - gridOffset * 2, cardSize * 0.75)) {
+            this.loader.pushAction({
+                type: ACTIONS.switchTurn,
+                user: this.game.opp
+            });
+        }
     }
 }

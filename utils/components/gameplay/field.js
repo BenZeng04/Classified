@@ -3,7 +3,7 @@ import React from "react";
 import {ActionHandler} from "../../gameplay/actions/actionHandler";
 import {GameState} from "../../gameplay/states/gameState";
 import {GameLoader} from "../../gameplay/database/gameLoader";
-import {Renderer, width} from "../../gameplay/graphics/renderer";
+import {ClassifiedSketch, width} from "../../gameplay/graphics/classifiedSketch";
 
 /**
  * !important
@@ -23,18 +23,18 @@ class Field extends React.Component {
         this.game = new GameState();
         this.handler = new ActionHandler(this.game);
 
-        const loader = new GameLoader(auth, this.game, this.handler);
-        loader.onGameStart(() => {
+        this.loader = new GameLoader(auth, this.game, this.handler);
+        this.loader.onGameStart(() => {
             this.props.startGame();
             this.setState({started: true});
         });
-        loader.loadAndListen()
+        this.loader.loadAndListen();
     }
 
     render() {
         if (this.state.started) {
             const Sketch = require("react-p5");
-            const graphics = new Renderer(this.game, this.handler);
+            const graphics = new ClassifiedSketch(this.game, this.handler, this.loader);
             return <div style={{
                 height: '100%',
                 width: '100%',

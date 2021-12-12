@@ -77,19 +77,20 @@ export class GameLoader {
     loadAndListen() {
         db.collection("games").doc(this.authInfo.currentMatchID).get().then(async (data) => {
             const collection = await GameLoader.loadCollection();
-            this.reload(data.data(), collection, true);
+            this.reloadActions(data.data(), collection, true);
             db.collection("games").doc(this.authInfo.currentMatchID).onSnapshot(async (updatedData) => {
-                this.reload(updatedData.data(), collection);
+                this.reloadActions(updatedData.data(), collection);
             })
         });
     }
 
     /**
+     * Identifies any unprocessed actions in the game's Action Queue and adds them to a pending action list.
      * @param {Object} data
      * @param {Object} collection
      * @param {Boolean} preload
      */
-    reload(data, collection, preload = false) {
+    reloadActions(data, collection, preload = false) {
         const actions = data.actionQueue;
 
         while (actions.hasOwnProperty(this.queueProcessIndex)) {
@@ -105,6 +106,23 @@ export class GameLoader {
             // Flags the action as processed
             this.queueProcessIndex++;
         }
+    }
+
+    /**
+     * Updates the database upon an action delivered by the user, calling processAction(). This function should be called
+     * by itself whenever any action within the game is completed.
+     * @param action
+     */
+    pushAction(action) {
+        if (!this.gameState.hasTurn) return;
+        if (this.gameActionHandler.hasPendingEvents()) return; // Do not push new actions when the game is currently resolving current ones
+
+        const docRef = db.collection("games").doc(this.authInfo.currentMatchID);
+        this.gameActionHandler.processAction(action);
+        this.queueProcessIndex++; // Prevents the onSnapshot() listener from calling processAction twice
+        const ignore = docRef.update({
+            [`actionQueue.${this.queueProcessIndex - 1}`]: action
+        });
     }
 
     start(data, collection) {

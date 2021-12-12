@@ -51,13 +51,18 @@ export class ActionHandler {
         }
     }
 
+    hasPendingEvents() {
+        return !this.eventQueue.isEmpty() || this.currentEvent != null;
+    }
+
+
     processAction(action, preload = false) {
         switch (action.type) {
             case ACTIONS.switchTurn: {
                 const onComplete = () => {
                     this.game.handOverTurn(action.user)
                 }
-                const event = 0 ? new SpontaneousEvent(onComplete) : Animation.createAnimation(action, this.game, onComplete);
+                const event = preload ? new SpontaneousEvent(onComplete) : Animation.createAnimation(action, this.game, onComplete);
                 this.pushEvent(event);
                 break;
             }
