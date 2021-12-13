@@ -242,6 +242,7 @@ export class ClassifiedSketch {
     }
 
     draw(p5) {
+        p5.pixelDensity(1);
         p5.textFont(icons.font);
         p5.imageMode(p5.CORNER);
         p5.background(icons.bg);
