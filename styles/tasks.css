@@ -1,0 +1,74 @@
+.main-task-menu {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+
+    align-self: center;
+    align-items: center;
+
+    width: 100%;
+    padding: 15px;
+}
+
+.vertical-menu {
+    flex-direction: column !important;
+}
+
+.main-task-menu > .button {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+
+    align-self: center;
+    align-items: center;
+
+    height: 200px;
+    width: 100%;
+    flex-basis: 40%;
+
+    text-align: center;
+    text-decoration: none;
+
+    border-radius: 6px;
+    border: none;
+    transition: 0.2s;
+
+    margin-left: 4px;
+    margin-right: 4px;
+
+    background: #c9d2d3;
+    padding: 10px 20px 10px 20px;
+}
+
+.main-task-menu > .dropdown-item {
+    background: #a2b1b4 !important;
+}
+
+.main-task-menu > .button > .event-name {
+    transition: 0.2s;
+    color: #444444;
+    font-size: 32px;
+    font-weight: lighter;
+}
+
+.main-task-menu > .button  > .description {
+    margin-top: 5px;
+    transition: 0.2s;
+    color: #575757;
+    font-size: 14px;
+    font-weight: normal;
+}
+
+.main-task-menu > .dropdown-item  > .description {
+    color: #363636 !important;
+    font-size: 17px !important;
+}
+
+.main-task-menu > .button:hover  {
+    background: #aaafb2;
+    text-decoration: none;
+}
+
+.main-task-menu > .button:hover > .event-name  {
+    font-size: 33px;
+}

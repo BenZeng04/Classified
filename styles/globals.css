@@ -2,8 +2,6 @@ html,
 body {
     padding: 0;
     margin: 0;
-    font-family: -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Oxygen,
-    Ubuntu, Cantarell, Fira Sans, Droid Sans, Helvetica Neue, sans-serif;
 }
 
 .flexbox, .fullscreen, .content, .form {
@@ -11,6 +9,34 @@ body {
     flex-direction: column;
     justify-content: flex-start;
     align-items: flex-start;
+    background: #f3f3f3;
+}
+
+.box {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    width: 100%;
+}
+
+.box-content {
+    display: flex;
+    flex-direction: column;
+    padding: 1px 0.5em 3px;
+    background: #d4e3ec;
+    margin: 0 0;
+    width: 100%;
+}
+
+.box > h3 {
+    width: 100%;
+    margin: 10px 0 0 0;
+    background: #3f85ad;
+    border-radius: 1px 1px 0 0;
+    color: white;
+    padding-top: 5px;
+    padding-bottom: 5px;
+    padding-left: 7px;
 }
 
 .button {
@@ -18,7 +44,22 @@ body {
     align-items: center;
     width: 10%;
     padding: 4px;
-    margin-top: 8px;
+
+    transition: 0.2s;
+    margin-bottom: 10px;
+    border: none;
+    background: none;
+
+    border-bottom: 2px solid rgba(131, 133, 141, 0.5);
+
+    font-family: inherit;
+    font-size: 16px;
+    font-weight: lighter !important;
+}
+
+.button:hover {
+    font-size: 18px;
+    border-bottom: 2px solid rgb(98, 111, 164);
 }
 
 .fullscreen, .content {
@@ -34,12 +75,11 @@ body {
 .title {
     align-self: flex-start;
     margin-bottom: 0;
-    font-weight: normal;
-    background: rgba(255, 255, 255, 0.7);
-    border: 1px solid gray;
-    border-radius: 4px;
-    padding: 4px;
 
+    font-size: 2rem;
+    font-weight: lighter;
+    color: #2d2d2d;
+    padding: 3px;
 }
 
 .divider-small {
@@ -59,4 +99,7 @@ a {
 
 * {
     box-sizing: border-box;
+    font-family: -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Oxygen,
+    Ubuntu, Cantarell, Fira Sans, Droid Sans, Helvetica Neue, sans-serif;
+    font-weight: 350;
 }
