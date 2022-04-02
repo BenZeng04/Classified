@@ -1,4 +1,4 @@
-import {ACTIONS, COLUMNS, DEFAULT_HP, ROWS} from "../../../constants/constants";
+import {ACTIONS, CLICK_STATES, COLUMNS, DEFAULT_HP, ROWS} from "../../../constants/constants";
 
 export const width = 2000;
 export const height = 1100;
@@ -23,6 +23,46 @@ const maxCardsPerRow = 4;
 const handDivider = gridDividerSeparation +
     (gridOffset * 2 + (maxCardsPerRow - 1) * cardSeparation + maxCardsPerRow * cardSize);
 
+export function flipField(game) {
+    return game.self !== game.firstPlayer;
+}
+
+/**
+ * Returns the effective row given whether or not the user's field is mirrored (Player 1 vs. Player 2)
+ * @param row
+ * @param game
+ * @returns {number|*}
+ */
+export function displayRow(row, game) {
+    return flipField(game)? ROWS - 1 - row: row;
+}
+
+export function fieldPositionToCoordinate(col, row) {
+    const offset = gridTileSize / 2.0 + gridWidth / 2.0;
+    const x = offset + gridOffset + gridTileSize * col;
+    const y = offset + (height - gridTileSize * ROWS) / 2 + gridTileSize * row;
+    return {
+        x: x,
+        y: y
+    }
+}
+
+export function handIndexToCoordinate(index) {
+    const effectiveX = index % maxCardsPerRow;
+    const effectiveY = Math.floor(index / maxCardsPerRow);
+    const cardCenterOffset = gridTileSize / 2.0 + gridWidth / 2.0;
+    // 3/4 is used to center the cards between the 2 dividers.
+    const actualX = gridDividerSeparation + gridOffset * 3 / 4 + cardCenterOffset + effectiveX * (cardSeparation + cardSize);
+    const actualY = cardCenterOffset + (height - gridTileSize * ROWS) / 2 + effectiveY * (cardSeparation + cardSize);
+    return {
+        x: actualX,
+        y: actualY
+    }
+}
+
+/**
+ * Helper class that statically attaches graphical helper methods uniform across gameplay.
+ */
 export class ClassifiedRenderer {
     /**
      * Attaches a new set of graphical methods to a p5 object.
@@ -113,15 +153,6 @@ export class ClassifiedRenderer {
 
         p5.displayCardOnField = (card, col, row, user) => {
             // Returns the centre of a card on the field
-            const fieldPositionToCoordinate = (col, row) => {
-                const offset = gridTileSize / 2.0 + gridWidth / 2.0;
-                const x = offset + gridOffset + gridTileSize * col;
-                const y = offset + (height - gridTileSize * ROWS) / 2 + gridTileSize * row;
-                return {
-                    x: x,
-                    y: y
-                }
-            }
             const coordinate = fieldPositionToCoordinate(col, row);
             const colour = card.user === user ? 'rgba(0,0,255,0.6)' : 'rgba(255,0,0,0.6)';
             p5.displayCard(card, coordinate.x, coordinate.y, colour);
@@ -182,18 +213,6 @@ export class ClassifiedRenderer {
             p5.line(dividerX, gridOffset, dividerX, height - gridOffset);
         }
         p5.displayCardInHand = (card, index) => {
-            const handIndexToCoordinate = (index) => {
-                const effectiveX = index % maxCardsPerRow;
-                const effectiveY = Math.floor(index / maxCardsPerRow);
-                const cardCenterOffset = gridTileSize / 2.0 + gridWidth / 2.0;
-                // 3/4 is used to center the cards between the 2 dividers.
-                const actualX = gridDividerSeparation + gridOffset * 3 / 4 + cardCenterOffset + effectiveX * (cardSeparation + cardSize);
-                const actualY = cardCenterOffset + (height - gridTileSize * ROWS) / 2 + effectiveY * (cardSeparation + cardSize);
-                return {
-                    x: actualX,
-                    y: actualY
-                }
-            }
             const coordinate = handIndexToCoordinate(index);
             p5.displayCard(card, coordinate.x, coordinate.y, 'rgba(115,115,115,0.6)');
         }
@@ -217,14 +236,15 @@ export class ClassifiedRenderer {
     }
 }
 
-
+/**
+ * Highest level class for all graphical user interface strictly related to gameplay.
+ */
 export class ClassifiedSketch {
 
     constructor(game, handler, loader) {
         this.game = game;
         this.handler = handler;
         this.loader = loader;
-
     }
 
     preload(p5) {
@@ -237,7 +257,10 @@ export class ClassifiedSketch {
     }
 
     setup(p5, canvasParentRef) {
-        p5.createCanvas(width, height).parent(canvasParentRef).mouseClicked((a) => this.mouseClicked(a));
+        const cnv = p5.createCanvas(width, height).parent(canvasParentRef);
+        cnv.mouseClicked((a) => this.mouseClicked(a));
+        cnv.mouseReleased((a) => this.mouseReleased(a));
+        cnv.mouseMoved((a) => this.mouseMoved(a));
         ClassifiedRenderer.attachGraphics(p5);
     }
 
@@ -255,7 +278,7 @@ export class ClassifiedSketch {
             for (let row = 0; row < ROWS; row++) {
                 if (this.game.field[col][row]) {
                     const c = this.game.field[col][row];
-                    p5.displayCardOnField(c, c.col, c.row, this.game.self)
+                    p5.displayCardOnField(c, c.col, displayRow(c.row, this.game), this.game.self)
                 }
             }
         }
@@ -281,18 +304,57 @@ export class ClassifiedSketch {
         this.handler.render(p5); // Handles any ongoing game-state related events in the queue on a one-event-per-frame basis
     }
 
+    /**
+     * Handles rectangle-point collision based on the CORNER mode for rectangles.
+     * @param mx
+     * @param my
+     * @param rx
+     * @param ry
+     * @param rw
+     * @param rh
+     * @returns {boolean}
+     */
     rectCollision(mx, my, rx, ry, rw, rh) {
         return mx >= rx && mx <= rx + rw && my >= ry && my <= ry + rh;
     }
 
+    /**
+     * Called whenever the canvas receives a mouseClick event.
+     * Please return out of the method whenever activating individual click events to prevent overlapped objects from performing extraneous behaviours.
+     * @param event The mouseClick event
+     */
     mouseClicked(event) {
         if (this.handler.hasPendingEvents()) return;
 
+        // Switch Turn
         if (this.rectCollision(event.offsetX, event.offsetY, handDivider + gridOffset, cardSize * 0.75, width - handDivider - gridOffset * 2, cardSize * 0.75)) {
             this.loader.pushAction({
                 type: ACTIONS.switchTurn,
                 user: this.game.opp
             });
+            return;
         }
+
+        // Place Card | Step 1 -> Dragging Card from Hand
+        for (let i = 0; i < this.game.hand.length; i++) {
+            const coordinate = handIndexToCoordinate(i);
+            if (this.rectCollision(event.offsetX, event.offsetY, coordinate.x - cardSize / 2.0, coordinate.y - cardSize / 2.0, cardSize, cardSize)) {
+                this.clickState = {type: CLICK_STATES.placingCard, handIndex: i}
+                break;
+            }
+        }
+    }
+
+    // TODO: Add card placements, then generify input-based events with an "inputEvent" wrapper class or the likes
+    mouseReleased(event) {
+        if (this.handler.hasPendingEvents()) return;
+
+        this.clickState = {type: CLICK_STATES.noClick};
+        //console.log(event);
+    }
+
+    mouseMoved(event) {
+        if (this.handler.hasPendingEvents()) return;
+        //console.log(event);
     }
 }

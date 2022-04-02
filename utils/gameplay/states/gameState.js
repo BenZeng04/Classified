@@ -1,6 +1,9 @@
 import {COLUMNS, DEFAULT_HP, ROWS} from "../../../constants/constants";
 import {Card} from "./card"
 
+/**
+ * Handles all variables attributed to the non-graphical state of the game, as well as handling and updating these variables based on all sets of non-graphical or interface related actions that can occur during gameplay.
+ */
 export class GameState {
     get collection() {
         return this._collection;
@@ -157,5 +160,20 @@ export class GameState {
         this.hasTurn = (user === this.self);
         this.turnCount[user]++;
         this.cash[user] = this.turnCount[user] + 2;
+    }
+
+    /**
+     * The logic for when a card gets placed by a user on the field
+     * @param {String} user said user
+     * @param {Number} handIndex index of that card in the hand of the user
+     * @param {Number} col column placed in
+     * @param {Number} row row placed in
+     */
+    placeCard(user, handIndex, col, row) {
+        const card = this.hand[handIndex];
+        this.hand.splice(handIndex, 1);
+        this.field[col][row] = card;
+        card.place(user, col, row);
+        this.cash[user] -= card.cost;
     }
 }

@@ -15,3 +15,8 @@ export const ACTIONS = {
     cardMoved: 3,
     cardAttacked: 4,
 }
+
+export const CLICK_STATES = {
+    noClick: 0,
+    placingCard: 1
+}

@@ -4,7 +4,16 @@ import {Animation, SpontaneousEvent} from "../graphics/animation";
 
 const maxToHandle = 7500;
 
-// TODO: Figure out a way to actually append the new graphic methods to p5 rather than having a separate wrapper class
+/*
+A handy stack list for implementations per new action:
+- Handle client-side user inputs required to perform and push the action to the database
+        (As well as checks if the action is valid (I.E. Does the user have enough cash to place a card?)) (ClassifiedSketch)
+- Handle processing reading the action from database (ActionHandler)
+- Handle updating game state from action (GameState)
+- Handle animating the action when received (Animation)
+TODO: Server side: handle if performing the action is possible or not using rules
+ */
+
 export class ActionHandler {
 
     constructor(game) {
@@ -60,15 +69,26 @@ export class ActionHandler {
     }
 
     processAction(action, preload = false) {
+        var onComplete = null;
         switch (action.type) {
             case ACTIONS.switchTurn: {
-                const onComplete = () => {
+                onComplete = () => {
                     this.game.handOverTurn(action.user)
+                }
+                break;
+            }
+            case ACTIONS.cardPlaced: {
+                const onComplete = () => {
+                    this.game.placeCard(action.user, action.handIndex, action.row, action.col)
                 }
                 const event = preload ? new SpontaneousEvent(onComplete) : Animation.createAnimation(action, this.game, onComplete);
                 this.pushEvent(event);
                 break;
             }
+        }
+        if (onComplete) {
+            const event = preload ? new SpontaneousEvent(onComplete) : Animation.createAnimation(action, this.game, onComplete);
+            this.pushEvent(event);
         }
     }
 }

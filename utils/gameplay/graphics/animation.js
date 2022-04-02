@@ -1,5 +1,5 @@
 import {ACTIONS} from "../../../constants/constants";
-import {height, width} from "./classifiedSketch";
+import {displayRow, fieldPositionToCoordinate, flipField, height, width} from "./classifiedSketch";
 
 /**
  * A Helper class to handle synchronous events that occur on a per-frame basis.
@@ -86,6 +86,13 @@ export class Animation extends SynchronousEvent {
                     p5.rect(0, 0, 1800, 300, 150);
                     p5.shadowText(message, 0, 0, 150)
                     p5.pop();
+                });
+            }
+            case ACTIONS.cardPlaced: {
+                return new Animation(40, onCompleteEvent, (p5, duration) => {
+                    const col = action.col, row = displayRow(action.row, game);
+                    const coordinate = fieldPositionToCoordinate(col, row);
+                    // TODO: Add card place animation
                 });
             }
         }
