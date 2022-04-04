@@ -105,22 +105,6 @@ export class GameState {
     }
 
     /**
-     * Custom setter that takes into consideration the mirrored field view for the two players.
-     * @param col
-     * @param row
-     * @param val
-     */
-    setField(col, row, val) {
-        if (this.self !== this.firstPlayer) row = ROWS - 1 - row;
-        (this.field)[col][row] = val;
-    }
-
-    getField(col, row) {
-        if (this.self !== this.firstPlayer) row = ROWS - 1 - row;
-        return (this.field)[col][row];
-    }
-
-    /**
      * Default loader for initialization of the game.
      * @param {Object<String>} collection The collection of cards that are read from in order to handle actions in the game.
      * @param {String} self The ID of the user running the program this state was initialized in.
@@ -191,8 +175,7 @@ export class GameState {
      */
     placeCard(user, handIndex, col, row) {
         const card = this.hand[user][handIndex];
-        if (this.self === user)
-            this.hand[user].splice(handIndex, 1);
+        this.hand[user].splice(handIndex, 1);
 
         this.field[col][row] = card;
         card.place(user, col, row);

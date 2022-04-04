@@ -280,10 +280,9 @@ export class ClassifiedSketch {
 
         for (let col = 0; col < COLUMNS; col++) {
             for (let row = 0; row < ROWS; row++) {
-                if (this.game.getField(col, row)) {
-                    const c = this.game.getField(col, row);
-                    console.log(col + " " + row + " " + c.name)
-                    p5.displayCardOnField(c, col, row, this.game.firstPlayer)
+                if (this.game.field[col][row]) {
+                    const c = this.game.field[col][row];
+                    p5.displayCardOnField(c, col, displayRow(row, this.game), this.game.firstPlayer)
                 }
             }
         }
@@ -376,15 +375,18 @@ export class ClassifiedSketch {
             // Both players get to place the card on what appears to them as row index 5 (zero-indexed)
             const row = ROWS - 1;
             for (let col = 0; col < COLUMNS; col++) {
-                const fieldCoordinate = fieldPositionToCoordinate(col, row);
-                if (this.rectCollision(coordinate.x, coordinate.y, fieldCoordinate.x - gridTileSize / 2, fieldCoordinate.y - gridTileSize / 2, gridTileSize, gridTileSize)) {
-                    this.loader.pushAction({
-                        type: ACTIONS.cardPlaced,
-                        user: this.game.self,
-                        handIndex: this.clickState.handIndex,
-                        col: col,
-                        row: displayRow(row, this.game)
-                    })
+                // Don't place on areas that already have a card
+                if (this.game.field[col][displayRow(row, this.game)] == null) {
+                    const fieldCoordinate = fieldPositionToCoordinate(col, row);
+                    if (this.rectCollision(coordinate.x, coordinate.y, fieldCoordinate.x - gridTileSize / 2, fieldCoordinate.y - gridTileSize / 2, gridTileSize, gridTileSize)) {
+                        this.loader.pushAction({
+                            type: ACTIONS.cardPlaced,
+                            user: this.game.self,
+                            handIndex: this.clickState.handIndex,
+                            col: col,
+                            row: displayRow(row, this.game)
+                        })
+                    }
                 }
             }
         }
