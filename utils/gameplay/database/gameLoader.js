@@ -149,8 +149,6 @@ export class GameLoader {
                 }
             }
             // Loading card objects from the listed IDs in the deck
-
-
             // Initializes GameState
             this.gameState.init(collection, self, opp, firstPlayer, deck);
             // Updates the React State, rendering the elements that depend on the game state

@@ -212,9 +212,10 @@ export class ClassifiedRenderer {
             p5.stroke('#ffffff');
             p5.line(dividerX, gridOffset, dividerX, height - gridOffset);
         }
-        p5.displayCardInHand = (card, index) => {
+        p5.displayCardInHand = (card, index, cash) => {
             const coordinate = handIndexToCoordinate(index);
-            p5.displayCard(card, coordinate.x, coordinate.y, 'rgba(115,115,115,0.6)');
+            const fill = card.cost > cash? 'rgba(47,46,46,0.72)': 'rgba(115,115,115,0.6)'; // Display cards too expensive differently
+            p5.displayCard(card, coordinate.x, coordinate.y, fill);
         }
         p5.displayDraggingCard = (card, index, offsetX, offsetY) => {
             const coordinate = handIndexToCoordinate(index);
@@ -315,7 +316,7 @@ export class ClassifiedSketch {
         for (let i = 0; i < this.game.hand[this.game.self].length; i++) {
             // Only display cards not being dragged
             if (!(this.clickState.type === CLICK_STATES.placingCard && this.clickState.handIndex === i)) {
-                p5.displayCardInHand(this.game.hand[this.game.self][i], i);
+                p5.displayCardInHand(this.game.hand[this.game.self][i], i, this.game.cash[this.game.self]);
             }
         }
         // Display card being dragged separately at end
@@ -368,6 +369,7 @@ export class ClassifiedSketch {
                 // Place Card | Step 1 -> Dragging Card from Hand
                 if (this.game.hasTurn) {
                     for (let i = 0; i < this.game.hand[this.game.self].length; i++) {
+                        if (this.game.hand[this.game.self][i].cost > this.game.cash[this.game.self]) continue; // Don't allow picking up cards you can't purchase
                         const coordinate = handIndexToCoordinate(i);
                         if (this.rectCollision(event.offsetX, event.offsetY, coordinate.x - cardSize / 2.0, coordinate.y - cardSize / 2.0, cardSize, cardSize)) {
                             this.clickState = {type: CLICK_STATES.placingCard, handIndex: i, initialX: event.offsetX, initialY: event.offsetY, currX: event.offsetX, currY: event.offsetY, offsetX: 0, offsetY: 0}
@@ -379,7 +381,6 @@ export class ClassifiedSketch {
         }
     }
 
-    // TODO: Add card placements, then generify input-based events with an "inputEvent" wrapper class or the likes
     mouseReleased(p5, event) {
         if (this.handler.hasPendingEvents()) return;
 
