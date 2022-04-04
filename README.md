@@ -1,5 +1,9 @@
 ## THIS PROJECT IS CURRENTLY IN DEVELOPMENT.
 
+Legacy Version (Written in Processing): https://github.com/BenZeng04/Classified-Archive/
+
+How to Play: https://docs.google.com/document/d/1fpkJ1T4Ij1dIptn7pxG1j-dtV7oJq93pZgeP6_S84kE/edit
+
 This is a [Next.js](https://nextjs.org/) project bootstrapped
 with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
 
