@@ -42,9 +42,9 @@ export default function SignUp() {
                                             console.log("Document successfully written!");
                                             window.location.replace("/")
                                         })
-                                        .catch((error) => {
-                                            console.error("Error writing document: ", error);
-                                        });
+                                            .catch((error) => {
+                                                console.error("Error writing document: ", error);
+                                            });
                                         // ...
                                     } else {
                                         // User is signed out
@@ -58,7 +58,8 @@ export default function SignUp() {
                         setError(error.message);
                     })
 
-                }}>Or... Sign Up Anonymously</button>
+                }}>Or... Sign Up Anonymously
+                </button>
             </div>
         </div>
 

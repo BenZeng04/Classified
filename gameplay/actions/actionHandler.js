@@ -1,6 +1,6 @@
-import {ACTIONS} from "../../../constants/constants";
-import {Queue} from "../../queue"
-import {Animation, SpontaneousEvent} from "../graphics/animation";
+import {ACTIONS} from "../../constants/constants";
+import {Queue} from "../../utils/queue"
+import {Animation} from "../graphics/animation";
 
 const maxToHandle = 7500;
 

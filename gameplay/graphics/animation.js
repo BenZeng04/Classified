@@ -1,5 +1,5 @@
-import {ACTIONS} from "../../../constants/constants";
-import {displayRow, fieldPositionToCoordinate, flipField, height, width} from "./classifiedSketch";
+import {ACTIONS} from "../../constants/constants";
+import {displayRow, fieldPositionToCoordinate, height, width} from "./classifiedSketch";
 
 /**
  * A Helper class to handle synchronous events that occur on a per-frame basis.
@@ -51,7 +51,7 @@ export class Animation extends SynchronousEvent {
     static createAnimation(action, game, onCompleteEvent) {
         switch (action.type) {
             case ACTIONS.switchTurn: {
-                return new Animation(80,(p5, duration) => {
+                return new Animation(80, (p5, duration) => {
                     const yourTurn = action.user === game.self;
                     const message = yourTurn ? "IT'S YOUR TURN!" : "OPPONENT'S TURN!"
                     // It's [your/your opponent]'s turn!

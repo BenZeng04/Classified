@@ -1,4 +1,4 @@
-import {ACTIONS, CLICK_STATES, COLUMNS, DEFAULT_HP, ROWS} from "../../../constants/constants";
+import {ACTIONS, CLICK_STATES, COLUMNS, DEFAULT_HP, ROWS} from "../../constants/constants";
 
 export const width = 2000;
 export const height = 1100;
@@ -34,7 +34,7 @@ export function flipField(game) {
  * @returns {number|*}
  */
 export function displayRow(row, game) {
-    return flipField(game)? ROWS - 1 - row: row;
+    return flipField(game) ? ROWS - 1 - row : row;
 }
 
 export function fieldPositionToCoordinate(col, row) {
@@ -214,7 +214,7 @@ export class ClassifiedRenderer {
         }
         p5.displayCardInHand = (card, index, cash) => {
             const coordinate = handIndexToCoordinate(index);
-            const fill = card.cost > cash? 'rgba(47,46,46,0.72)': 'rgba(115,115,115,0.6)'; // Display cards too expensive differently
+            const fill = card.cost > cash ? 'rgba(47,46,46,0.72)' : 'rgba(115,115,115,0.6)'; // Display cards too expensive differently
             p5.displayCard(card, coordinate.x, coordinate.y, fill);
         }
         p5.displayDraggingCard = (card, index, offsetX, offsetY) => {
@@ -323,8 +323,8 @@ export class ClassifiedSketch {
         if (this.clickState.type === CLICK_STATES.placingCard)
             p5.displayDraggingCard(this.game.hand[this.game.self][this.clickState.handIndex], this.clickState.handIndex, this.clickState.offsetX, this.clickState.offsetY)
 
-        const colour = this.game.hasTurn? 'rgba(171,128,232,0.86)': 'rgba(192,192,192,0.66)';
-        const msg = this.game.hasTurn? 'Switch Turn!': "Opponent's Turn!";
+        const colour = this.game.hasTurn ? 'rgba(171,128,232,0.86)' : 'rgba(192,192,192,0.66)';
+        const msg = this.game.hasTurn ? 'Switch Turn!' : "Opponent's Turn!";
         p5.button(handDivider + gridOffset, cardSize * 0.75, width - handDivider - gridOffset * 2, cardSize * 0.75, colour, msg);
 
         // KEEP THESE AT THE VERY END
@@ -372,7 +372,16 @@ export class ClassifiedSketch {
                         if (this.game.hand[this.game.self][i].cost > this.game.cash[this.game.self]) continue; // Don't allow picking up cards you can't purchase
                         const coordinate = handIndexToCoordinate(i);
                         if (this.rectCollision(event.offsetX, event.offsetY, coordinate.x - cardSize / 2.0, coordinate.y - cardSize / 2.0, cardSize, cardSize)) {
-                            this.clickState = {type: CLICK_STATES.placingCard, handIndex: i, initialX: event.offsetX, initialY: event.offsetY, currX: event.offsetX, currY: event.offsetY, offsetX: 0, offsetY: 0}
+                            this.clickState = {
+                                type: CLICK_STATES.placingCard,
+                                handIndex: i,
+                                initialX: event.offsetX,
+                                initialY: event.offsetY,
+                                currX: event.offsetX,
+                                currY: event.offsetY,
+                                offsetX: 0,
+                                offsetY: 0
+                            }
                             return;
                         }
                     }

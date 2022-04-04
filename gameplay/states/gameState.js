@@ -1,6 +1,4 @@
-import {COLUMNS, DEFAULT_HP, ROWS} from "../../../constants/constants";
-import {Card} from "./card"
-import {displayRow} from "../graphics/classifiedSketch";
+import {COLUMNS, DEFAULT_HP, ROWS} from "../../constants/constants";
 
 /**
  * Handles all variables attributed to the non-graphical state of the game, as well as handling and updating these variables based on all sets of non-graphical or interface related actions that can occur during gameplay.

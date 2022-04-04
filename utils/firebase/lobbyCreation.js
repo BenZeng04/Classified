@@ -16,7 +16,7 @@ Step 3: Add the player to the game.
 
 import {db} from "./firebase";
 import {ACTIONS, DECK_CAPACITY} from "../../constants/constants";
-import {GameLoader} from "../gameplay/database/gameLoader";
+import {GameLoader} from "../../gameplay/database/gameLoader";
 
 /**
  * Creates a fresh new lobby.

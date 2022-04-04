@@ -1,5 +1,5 @@
-import {db} from "../../firebase/firebase";
-import {ACTIONS} from "../../../constants/constants";
+import {db} from "../../utils/firebase/firebase";
+import {ACTIONS} from "../../constants/constants";
 import {Card} from "../states/card"
 
 /**

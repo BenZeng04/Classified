@@ -1,9 +1,9 @@
 import React from "react";
 
-import {ActionHandler} from "../../gameplay/actions/actionHandler";
-import {GameState} from "../../gameplay/states/gameState";
-import {GameLoader} from "../../gameplay/database/gameLoader";
-import {ClassifiedSketch, width} from "../../gameplay/graphics/classifiedSketch";
+import {ActionHandler} from "../../../gameplay/actions/actionHandler";
+import {GameState} from "../../../gameplay/states/gameState";
+import {GameLoader} from "../../../gameplay/database/gameLoader";
+import {ClassifiedSketch, width} from "../../../gameplay/graphics/classifiedSketch";
 
 /**
  * !important
@@ -45,7 +45,9 @@ class Field extends React.Component {
                     transformOrigin: `0 0`,
                     transform: `scale(${0.825 * innerWidth / width})`,
                 }} preload={(p5) => graphics.preload(p5)} setup={(p5, cpr) => graphics.setup(p5, cpr)}
-                        draw={(p5) => graphics.draw(p5)} mousePressed={(p5, evt) => {graphics.mousePressed(p5, evt)}}/>
+                        draw={(p5) => graphics.draw(p5)} mousePressed={(p5, evt) => {
+                    graphics.mousePressed(p5, evt)
+                }}/>
             </div>;
         } else {
             return <></>;

@@ -51,7 +51,7 @@
     font-weight: lighter;
 }
 
-.main-task-menu > .button  > .description {
+.main-task-menu > .button > .description {
     margin-top: 5px;
     transition: 0.2s;
     color: #575757;
@@ -59,16 +59,16 @@
     font-weight: normal;
 }
 
-.main-task-menu > .dropdown-item  > .description {
+.main-task-menu > .dropdown-item > .description {
     color: #363636 !important;
     font-size: 17px !important;
 }
 
-.main-task-menu > .button:hover  {
+.main-task-menu > .button:hover {
     background: #aaafb2;
     text-decoration: none;
 }
 
-.main-task-menu > .button:hover > .event-name  {
+.main-task-menu > .button:hover > .event-name {
     font-size: 33px;
 }
