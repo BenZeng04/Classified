@@ -232,6 +232,7 @@ export class ClassifiedRenderer {
             if (clickState === CLICK_STATES.placingCard) {
                 cardPlaceAreaHighlightTone = (Math.sin(Math.PI * globalAnimTimer / 60.0) + 1) * 90;
             }
+            p5.noStroke();
             p5.fill(106, 103, 182, cardPlaceAreaHighlightTone)
             p5.rectMode(p5.CORNER);
 
