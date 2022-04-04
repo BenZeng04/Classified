@@ -1,8 +1,10 @@
 import {COLUMNS, DEFAULT_HP, ROWS} from "../../../constants/constants";
 import {Card} from "./card"
+import {displayRow} from "../graphics/classifiedSketch";
 
 /**
  * Handles all variables attributed to the non-graphical state of the game, as well as handling and updating these variables based on all sets of non-graphical or interface related actions that can occur during gameplay.
+ * When handling movement & tile-based logic, use absolute row instead of relative (flipped).
  */
 
 export class GameState {
@@ -184,16 +186,15 @@ export class GameState {
      * The logic for when a card gets placed by a user on the field
      * @param {String} user said user
      * @param {Number} handIndex index of that card in the hand of the user
-     * @param {Number} col column placed in
-     * @param {Number} row row placed in
+     * @param {Number} col absolute column placed in
+     * @param {Number} row absolute row placed in
      */
     placeCard(user, handIndex, col, row) {
-        console.log("asd")
         const card = this.hand[user][handIndex];
         if (this.self === user)
             this.hand[user].splice(handIndex, 1);
 
-        this.setField(col, row, card);
+        this.field[col][row] = card;
         card.place(user, col, row);
         this.cash[user] -= card.cost;
     }

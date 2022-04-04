@@ -148,7 +148,6 @@ export class GameLoader {
                     deck[player].push(collection[cardID]);
                 }
             }
-
             // Loading card objects from the listed IDs in the deck
 
 

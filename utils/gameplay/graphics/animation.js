@@ -96,7 +96,7 @@ export class Animation extends SynchronousEvent {
                 // Animation follows the event of placing the card (as the card won't show up on the field until it is placed)
                 // Animation logic creates an aura around where the card is placed, so it being not on the field makes no sense
                 return new Animation(40, (p5, duration) => {
-                    const col = action.col, row = action.row;
+                    const col = action.col, row = displayRow(action.row, game);
                     const coordinate = fieldPositionToCoordinate(col, row);
 
                     const transparency = 240 - duration * 6;

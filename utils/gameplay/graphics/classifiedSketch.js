@@ -282,7 +282,8 @@ export class ClassifiedSketch {
             for (let row = 0; row < ROWS; row++) {
                 if (this.game.getField(col, row)) {
                     const c = this.game.getField(col, row);
-                    p5.displayCardOnField(c, c.col, c.row, this.game.self)
+                    console.log(col + " " + row + " " + c.name)
+                    p5.displayCardOnField(c, col, row, this.game.firstPlayer)
                 }
             }
         }
@@ -382,7 +383,7 @@ export class ClassifiedSketch {
                         user: this.game.self,
                         handIndex: this.clickState.handIndex,
                         col: col,
-                        row: row
+                        row: displayRow(row, this.game)
                     })
                 }
             }
