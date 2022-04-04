@@ -4,6 +4,7 @@ import {Card} from "./card"
 /**
  * Handles all variables attributed to the non-graphical state of the game, as well as handling and updating these variables based on all sets of non-graphical or interface related actions that can occur during gameplay.
  */
+
 export class GameState {
     get collection() {
         return this._collection;
@@ -102,12 +103,28 @@ export class GameState {
     }
 
     /**
+     * Custom setter that takes into consideration the mirrored field view for the two players.
+     * @param col
+     * @param row
+     * @param val
+     */
+    setField(col, row, val) {
+        if (this.self !== this.firstPlayer) row = ROWS - 1 - row;
+        (this.field)[col][row] = val;
+    }
+
+    getField(col, row) {
+        if (this.self !== this.firstPlayer) row = ROWS - 1 - row;
+        return (this.field)[col][row];
+    }
+
+    /**
      * Default loader for initialization of the game.
      * @param {Object<String>} collection The collection of cards that are read from in order to handle actions in the game.
      * @param {String} self The ID of the user running the program this state was initialized in.
      * @param {String} opp The ID of the user's opponent.
      * @param {String} firstPlayer A randomly chosen ID, representing the ID of the player that goes first.
-     * @param {Card[]} deck The cards in the user's deck, cloned from the collection.
+     * @param {{}} deck The cards in the user's deck, cloned from the collection.
      */
     init(collection, self, opp, firstPlayer, deck) {
         this._collection = collection;
@@ -116,7 +133,10 @@ export class GameState {
         this._firstPlayer = firstPlayer;
         this._deck = deck;
         this._hasTurn = false; // Set to false for now, will be initialized when the turn gets passed to one of the two players via the Database
-        this._hand = [];
+        this._hand = {
+            [self]: [],
+            [opp]: []
+        };
         this._hp = {
             [self]: DEFAULT_HP,
             [opp]: DEFAULT_HP
@@ -142,11 +162,9 @@ export class GameState {
      * @param {String} user said user
      */
     drawCard(user) {
-        if (user === this.self) { // Updates your own deck if the user drawing the card is you.
-            if (this.deck.length !== 0 && this.hand.length <= 8) {
-                const topDeck = this.deck.shift();
-                this.hand.push(topDeck.clone());
-            }
+        if (this.deck[user].length !== 0 && this.hand[user].length <= 8) {
+            const topDeck = this.deck[user].shift();
+            this.hand[user].push(topDeck.clone());
         }
     }
 
@@ -170,9 +188,12 @@ export class GameState {
      * @param {Number} row row placed in
      */
     placeCard(user, handIndex, col, row) {
-        const card = this.hand[handIndex];
-        this.hand.splice(handIndex, 1);
-        this.field[col][row] = card;
+        console.log("asd")
+        const card = this.hand[user][handIndex];
+        if (this.self === user)
+            this.hand[user].splice(handIndex, 1);
+
+        this.setField(col, row, card);
         card.place(user, col, row);
         this.cash[user] -= card.cost;
     }

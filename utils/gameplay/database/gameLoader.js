@@ -4,6 +4,7 @@ import {Card} from "../states/card"
 
 /**
  * Wrapper class that initially loads data from the database and periodically fires events whenever an action occurs.
+ * Handles pushing new actions to the database.
  * Accepts a parameter for an unloaded GameState instance that it will update by reference.
  */
 export class GameLoader {
@@ -131,21 +132,26 @@ export class GameLoader {
             // Parses the data
             const self = this.authInfo.authUser.uid;
             const firstPlayer = data.firstPlayer;
-            // Loading card objects from the listed IDs in the deck
-            const deckID = data.currentPlayers[self].deck;
-            const deck = [];
-            for (let i = 0; i < deckID.length; i++) {
-                const cardID = deckID[i];
-                deck.push(collection[cardID]);
-            }
-            const players = data.currentPlayers;
 
+            const players = data.currentPlayers;
+            const deck = {};
             let opp = null;
             for (const player in players) {
                 if (player !== self) {
                     opp = player;
                 }
+                deck[player] = [];
+                const deckID = data.currentPlayers[player].deck;
+
+                for (let i = 0; i < deckID.length; i++) {
+                    const cardID = deckID[i];
+                    deck[player].push(collection[cardID]);
+                }
             }
+
+            // Loading card objects from the listed IDs in the deck
+
+
             // Initializes GameState
             this.gameState.init(collection, self, opp, firstPlayer, deck);
             // Updates the React State, rendering the elements that depend on the game state

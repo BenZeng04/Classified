@@ -6,7 +6,7 @@ const maxToHandle = 7500;
 
 /*
 A handy stack list for implementations per new action:
-- Handle client-side user inputs required to perform and push the action to the database
+- Handle client-side user inputs required to perform and once that is done, call pushAction in GameLoader
         (As well as checks if the action is valid (I.E. Does the user have enough cash to place a card?)) (ClassifiedSketch)
 - Handle processing reading the action from database (ActionHandler)
 - Handle updating game state from action (GameState)
@@ -51,16 +51,12 @@ export class ActionHandler {
      * @param p5
      */
     render(p5) {
-        while (true) {
-            if (this.currentEvent == null && !this.eventQueue.isEmpty()) {
-                this.currentEvent = this.eventQueue.poll();
-            }
-            // Loop is so that multiple spontaneous events get handled instantly rather than once-per-frame
-            if (this.currentEvent != null) {
-                const resolved = this.currentEvent.handle(p5);
-                if (resolved) this.currentEvent = null;
-                else break;
-            } else break;
+        if (this.currentEvent == null && !this.eventQueue.isEmpty()) {
+            this.currentEvent = this.eventQueue.poll();
+        }
+        if (this.currentEvent != null) {
+            const resolved = this.currentEvent.handle(p5);
+            if (resolved) this.currentEvent = null;
         }
     }
 
@@ -69,25 +65,18 @@ export class ActionHandler {
     }
 
     processAction(action, preload = false) {
-        var onComplete = null;
         switch (action.type) {
             case ACTIONS.switchTurn: {
-                onComplete = () => {
-                    this.game.handOverTurn(action.user)
-                }
+                this.game.handOverTurn(action.user);
                 break;
             }
             case ACTIONS.cardPlaced: {
-                const onComplete = () => {
-                    this.game.placeCard(action.user, action.handIndex, action.row, action.col)
-                }
-                const event = preload ? new SpontaneousEvent(onComplete) : Animation.createAnimation(action, this.game, onComplete);
-                this.pushEvent(event);
+                this.game.placeCard(action.user, action.handIndex, action.col, action.row);
                 break;
             }
         }
-        if (onComplete) {
-            const event = preload ? new SpontaneousEvent(onComplete) : Animation.createAnimation(action, this.game, onComplete);
+        if (!preload) {
+            const event = Animation.createAnimation(action, this.game);
             this.pushEvent(event);
         }
     }

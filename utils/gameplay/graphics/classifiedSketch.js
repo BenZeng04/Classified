@@ -184,7 +184,7 @@ export class ClassifiedRenderer {
             p5.image(icons.hp, midX - defWidth / 2 - iconOffset, midY, iconSize, iconSize)
 
             p5.textAlign(p5.CENTER, p5.CENTER);
-            p5.shadowText(`${currHP} / ${maxHP}`, midX - defWidth / 2 - iconOffset, midY - 1, 16)
+            p5.shadowText(`${currHP}`, midX - defWidth / 2 - iconOffset, midY - 3, 22)
 
             p5.rectMode(p5.CENTER);
 
@@ -216,6 +216,10 @@ export class ClassifiedRenderer {
             const coordinate = handIndexToCoordinate(index);
             p5.displayCard(card, coordinate.x, coordinate.y, 'rgba(115,115,115,0.6)');
         }
+        p5.displayDraggingCard = (card, index, offsetX, offsetY) => {
+            const coordinate = handIndexToCoordinate(index);
+            p5.displayCard(card, coordinate.x + offsetX, coordinate.y + offsetY, 'rgba(115,115,115,0.6)');
+        }
         p5.effectiveBorder = () => {
             p5.rectMode(p5.CORNER);
             p5.strokeWeight(5);
@@ -245,6 +249,7 @@ export class ClassifiedSketch {
         this.game = game;
         this.handler = handler;
         this.loader = loader;
+        this.clickState = {type: CLICK_STATES.noClick};
     }
 
     preload(p5) {
@@ -258,9 +263,8 @@ export class ClassifiedSketch {
 
     setup(p5, canvasParentRef) {
         const cnv = p5.createCanvas(width, height).parent(canvasParentRef);
-        cnv.mouseClicked((a) => this.mouseClicked(a));
-        cnv.mouseReleased((a) => this.mouseReleased(a));
-        cnv.mouseMoved((a) => this.mouseMoved(a));
+        cnv.mouseReleased((a) => this.mouseReleased(p5, a));
+        cnv.mouseMoved((a) => this.mouseMoved(p5, a));
         ClassifiedRenderer.attachGraphics(p5);
     }
 
@@ -276,9 +280,9 @@ export class ClassifiedSketch {
 
         for (let col = 0; col < COLUMNS; col++) {
             for (let row = 0; row < ROWS; row++) {
-                if (this.game.field[col][row]) {
-                    const c = this.game.field[col][row];
-                    p5.displayCardOnField(c, c.col, displayRow(c.row, this.game), this.game.self)
+                if (this.game.getField(col, row)) {
+                    const c = this.game.getField(col, row);
+                    p5.displayCardOnField(c, c.col, c.row, this.game.self)
                 }
             }
         }
@@ -292,8 +296,15 @@ export class ClassifiedSketch {
         p5.verticalDivider(gridDividerSeparation);
         p5.verticalDivider(handDivider);
 
-        for (let i = 0; i < this.game.hand.length; i++)
-            p5.displayCardInHand(this.game.hand[i], i);
+        for (let i = 0; i < this.game.hand[this.game.self].length; i++) {
+            // Only display cards not being dragged
+            if (!(this.clickState.type === CLICK_STATES.placingCard && this.clickState.handIndex === i)) {
+                p5.displayCardInHand(this.game.hand[this.game.self][i], i);
+            }
+        }
+        // Display card being dragged separately at end
+        if (this.clickState.type === CLICK_STATES.placingCard)
+            p5.displayDraggingCard(this.game.hand[this.game.self][this.clickState.handIndex], this.clickState.handIndex, this.clickState.offsetX, this.clickState.offsetY)
 
         const colour = this.game.hasTurn? 'rgba(171,128,232,0.86)': 'rgba(192,192,192,0.66)';
         const msg = this.game.hasTurn? 'Switch Turn!': "Opponent's Turn!";
@@ -323,38 +334,70 @@ export class ClassifiedSketch {
      * Please return out of the method whenever activating individual click events to prevent overlapped objects from performing extraneous behaviours.
      * @param event The mouseClick event
      */
-    mouseClicked(event) {
+    mousePressed(p5, event) {
         if (this.handler.hasPendingEvents()) return;
 
-        // Switch Turn
-        if (this.rectCollision(event.offsetX, event.offsetY, handDivider + gridOffset, cardSize * 0.75, width - handDivider - gridOffset * 2, cardSize * 0.75)) {
-            this.loader.pushAction({
-                type: ACTIONS.switchTurn,
-                user: this.game.opp
-            });
-            return;
-        }
+        switch (this.clickState.type) {
+            // Actions that can only be done with a noClick state
+            case CLICK_STATES.noClick: {
+                // Switch Turn
+                if (this.rectCollision(event.offsetX, event.offsetY, handDivider + gridOffset, cardSize * 0.75, width - handDivider - gridOffset * 2, cardSize * 0.75)) {
+                    this.loader.pushAction({
+                        type: ACTIONS.switchTurn,
+                        user: this.game.opp
+                    });
+                    return;
+                }
 
-        // Place Card | Step 1 -> Dragging Card from Hand
-        for (let i = 0; i < this.game.hand.length; i++) {
-            const coordinate = handIndexToCoordinate(i);
-            if (this.rectCollision(event.offsetX, event.offsetY, coordinate.x - cardSize / 2.0, coordinate.y - cardSize / 2.0, cardSize, cardSize)) {
-                this.clickState = {type: CLICK_STATES.placingCard, handIndex: i}
-                break;
+                // Place Card | Step 1 -> Dragging Card from Hand
+                if (this.game.hasTurn) {
+                    for (let i = 0; i < this.game.hand[this.game.self].length; i++) {
+                        const coordinate = handIndexToCoordinate(i);
+                        if (this.rectCollision(event.offsetX, event.offsetY, coordinate.x - cardSize / 2.0, coordinate.y - cardSize / 2.0, cardSize, cardSize)) {
+                            this.clickState = {type: CLICK_STATES.placingCard, handIndex: i, initialX: event.offsetX, initialY: event.offsetY, currX: event.offsetX, currY: event.offsetY, offsetX: 0, offsetY: 0}
+                            return;
+                        }
+                    }
+                }
             }
         }
     }
 
     // TODO: Add card placements, then generify input-based events with an "inputEvent" wrapper class or the likes
-    mouseReleased(event) {
+    mouseReleased(p5, event) {
         if (this.handler.hasPendingEvents()) return;
 
+        if (this.clickState.type === CLICK_STATES.placingCard) {
+            const coordinate = handIndexToCoordinate(this.clickState.handIndex);
+            coordinate.x += this.clickState.offsetX;
+            coordinate.y += this.clickState.offsetY;
+
+            // Both players get to place the card on what appears to them as row index 5 (zero-indexed)
+            const row = ROWS - 1;
+            for (let col = 0; col < COLUMNS; col++) {
+                const fieldCoordinate = fieldPositionToCoordinate(col, row);
+                if (this.rectCollision(coordinate.x, coordinate.y, fieldCoordinate.x - gridTileSize / 2, fieldCoordinate.y - gridTileSize / 2, gridTileSize, gridTileSize)) {
+                    this.loader.pushAction({
+                        type: ACTIONS.cardPlaced,
+                        user: this.game.self,
+                        handIndex: this.clickState.handIndex,
+                        col: col,
+                        row: row
+                    })
+                }
+            }
+        }
         this.clickState = {type: CLICK_STATES.noClick};
-        //console.log(event);
     }
 
-    mouseMoved(event) {
+    mouseMoved(p5, event) {
         if (this.handler.hasPendingEvents()) return;
-        //console.log(event);
+
+        if (this.clickState.type === CLICK_STATES.placingCard) {
+            this.clickState.currX = event.offsetX;
+            this.clickState.currY = event.offsetY;
+            this.clickState.offsetX = this.clickState.currX - this.clickState.initialX;
+            this.clickState.offsetY = this.clickState.currY - this.clickState.initialY;
+        }
     }
 }

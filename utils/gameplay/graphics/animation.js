@@ -36,18 +36,22 @@ export class SpontaneousEvent extends SynchronousEvent {
 
 export class Animation extends SynchronousEvent {
 
-    constructor(duration, onAnimationEnd, render) {
+    /**
+     * Default constructor
+     * @param {Number} duration duration in frames of the animation
+     * @param render what runs per render
+     */
+    constructor(duration, render) {
         super();
         this.maxDuration = duration;
         this.durationPassed = 0;
-        this.onAnimationEnd = onAnimationEnd;
         this.render = render;
     }
 
     static createAnimation(action, game, onCompleteEvent) {
         switch (action.type) {
             case ACTIONS.switchTurn: {
-                return new Animation(80, onCompleteEvent, (p5, duration) => {
+                return new Animation(80,(p5, duration) => {
                     const yourTurn = action.user === game.self;
                     const message = yourTurn ? "IT'S YOUR TURN!" : "OPPONENT'S TURN!"
                     // It's [your/your opponent]'s turn!
@@ -89,10 +93,17 @@ export class Animation extends SynchronousEvent {
                 });
             }
             case ACTIONS.cardPlaced: {
-                return new Animation(40, onCompleteEvent, (p5, duration) => {
-                    const col = action.col, row = displayRow(action.row, game);
+                // Animation follows the event of placing the card (as the card won't show up on the field until it is placed)
+                // Animation logic creates an aura around where the card is placed, so it being not on the field makes no sense
+                return new Animation(40, (p5, duration) => {
+                    const col = action.col, row = action.row;
                     const coordinate = fieldPositionToCoordinate(col, row);
-                    // TODO: Add card place animation
+
+                    const transparency = 240 - duration * 6;
+                    p5.fill(255, transparency);
+                    p5.stroke(170, transparency);
+                    p5.strokeWeight(150);
+                    p5.ellipse(coordinate.x, coordinate.y, 220, 220)
                 });
             }
         }
@@ -100,7 +111,6 @@ export class Animation extends SynchronousEvent {
 
     handle(p5) {
         if (this.durationPassed === this.maxDuration) {
-            this.onAnimationEnd();
             return true;
         }
         this.render(p5, this.durationPassed);
