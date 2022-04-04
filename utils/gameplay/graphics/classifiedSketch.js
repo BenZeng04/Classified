@@ -227,6 +227,17 @@ export class ClassifiedRenderer {
             p5.stroke('#FFFFFF');
             p5.rect(0, 0, width, height);
         }
+        p5.cardPlacementHighlightZone = (clickState, globalAnimTimer) => {
+            let cardPlaceAreaHighlightTone = 142;
+            if (clickState === CLICK_STATES.placingCard) {
+                cardPlaceAreaHighlightTone = (Math.sin(Math.PI * globalAnimTimer / 60.0) + 1) * 90;
+            }
+            p5.fill(106, 103, 182, cardPlaceAreaHighlightTone)
+            p5.rectMode(p5.CORNER);
+
+            const topLeftCorner = fieldPositionToCoordinate(0, ROWS - 1);
+            p5.rect(topLeftCorner.x - gridTileSize / 2.0, topLeftCorner.y - gridTileSize / 2.0, gridTileSize * COLUMNS, gridTileSize)
+        }
         p5.button = (x, y, xLen, yLen, colour, text) => {
             p5.rectMode(p5.CORNER);
             p5.strokeWeight(5);
@@ -247,6 +258,7 @@ export class ClassifiedSketch {
 
     constructor(game, handler, loader) {
         this.game = game;
+        this.globalAnimTimer = 0; // Global counter for frames, used for global animations not associated with database events
         this.handler = handler;
         this.loader = loader;
         this.clickState = {type: CLICK_STATES.noClick};
@@ -269,11 +281,14 @@ export class ClassifiedSketch {
     }
 
     draw(p5) {
+        this.globalAnimTimer++;
         p5.pixelDensity(1);
         p5.textFont(icons.font);
         p5.imageMode(p5.CORNER);
         p5.background(icons.bg);
         p5.smooth();
+
+        p5.cardPlacementHighlightZone(this.clickState.type, this.globalAnimTimer);
 
         p5.gameGrid(127, shadowOffset.normal); // Shadow
         p5.gameGrid(255, 0); // Real Thing
