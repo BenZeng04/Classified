@@ -65,7 +65,8 @@ export class GameLoader {
                 current.health,
                 current.movement,
                 current.range,
-                current.cost
+                current.cost,
+                cardID
             )
         }
         return collection;

@@ -64,6 +64,12 @@ export class ActionHandler {
         return !this.eventQueue.isEmpty() || this.currentEvent != null;
     }
 
+    /**
+     * Method responsible for updating the gameState accordingly during any form of update to the database (either by you or the opponent) and subsequently
+     * creating an animation along with it.
+     * @param action The action information
+     * @param preload Whether the action is preloaded (already happened and user is refreshing game tab) - this will determine whether to play an animation or not
+     */
     processAction(action, preload = false) {
         switch (action.type) {
             case ACTIONS.switchTurn: {

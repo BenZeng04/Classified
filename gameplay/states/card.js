@@ -2,7 +2,14 @@
  * The class representing the base properties for a card represented in its raw database form, prior to being placed on the playfield.
  */
 export class Card {
-    constructor(name, description, attack, health, movement, range, cost) {
+    get id() {
+        return this._id;
+    }
+
+    set id(value) {
+        this._id = value;
+    }
+    constructor(name, description, attack, health, movement, range, cost, id) {
         this._name = name;
         this._description = description;
         this._attack = attack;
@@ -10,6 +17,7 @@ export class Card {
         this._movement = movement;
         this._range = range;
         this._cost = cost;
+        this._id = id;
     }
 
     get name() {
@@ -93,7 +101,7 @@ export class Card {
     }
 
     clone() {
-        return new Card(this.name, this.description, this.attack, this.health, this.movement, this.range, this.cost);
+        return new Card(this.name, this.description, this.attack, this.health, this.movement, this.range, this.cost, this.id);
     }
 
     place(user, col, row) {

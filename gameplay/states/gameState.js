@@ -177,6 +177,8 @@ export class GameState {
 
         this.field[col][row] = card;
         card.place(user, col, row);
+        // "Restashing"
+        this.deck[user].push(this.collection[card.id]);
         this.cash[user] -= card.cost;
     }
 }
