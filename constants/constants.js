@@ -18,5 +18,6 @@ export const ACTIONS = {
 
 export const CLICK_STATES = {
     noClick: 0,
-    placingCard: 1
+    cardDragged: 1,
+    cardSelected: 2
 }

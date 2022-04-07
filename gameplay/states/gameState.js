@@ -162,6 +162,14 @@ export class GameState {
         this.hasTurn = (user === this.self);
         this.turnCount[user]++;
         this.cash[user] = this.turnCount[user] + 2;
+
+        for (let col = 0; col < COLUMNS; col++) {
+            for (let row = 0; row < ROWS; row++) {
+                if (this.field[col][row]) {
+                    this.field[col][row].onTurnSwitch();
+                }
+            }
+        }
     }
 
     /**

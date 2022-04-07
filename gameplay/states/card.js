@@ -2,13 +2,12 @@
  * The class representing the base properties for a card represented in its raw database form, prior to being placed on the playfield.
  */
 export class Card {
-    get id() {
-        return this._id;
+
+    setDefaultGameStates() {
+        this._movesLeft = 0;
+        this._attacksLeft = 0;
     }
 
-    set id(value) {
-        this._id = value;
-    }
     constructor(name, description, attack, health, movement, range, cost, id) {
         this._name = name;
         this._description = description;
@@ -18,6 +17,7 @@ export class Card {
         this._range = range;
         this._cost = cost;
         this._id = id;
+        this.setDefaultGameStates();
     }
 
     get name() {
@@ -100,6 +100,30 @@ export class Card {
         this._row = value;
     }
 
+    get id() {
+        return this._id;
+    }
+
+    set id(value) {
+        this._id = value;
+    }
+
+    get movesLeft() {
+        return this._movesLeft;
+    }
+
+    set movesLeft(value) {
+        this._movesLeft = value;
+    }
+
+    get attacksLeft() {
+        return this._attacksLeft;
+    }
+
+    set attacksLeft(value) {
+        this._attacksLeft = value;
+    }
+
     clone() {
         return new Card(this.name, this.description, this.attack, this.health, this.movement, this.range, this.cost, this.id);
     }
@@ -109,4 +133,28 @@ export class Card {
         this._col = col;
         this._row = row;
     }
+
+    onTurnSwitch() {
+        this._attacksLeft = 1;
+        this._movesLeft = 1;
+    }
+
+    move(col, row) {
+        this._col = col;
+        this._row = row;
+        this._movesLeft--;
+    }
+
+    validMoveLocations(field) {
+        let locations = [];
+        for (let direction in [1, -1]) {
+            for (let dist = 1; dist <= this.movement; dist++) {
+                const currRow = this.row + dist;
+                if (field[this.col][currRow]) break;
+                locations.push([this.col, currRow]);
+            }
+        }
+        return locations;
+    }
 }
+

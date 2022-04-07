@@ -40,10 +40,12 @@ export class Animation extends SynchronousEvent {
      * Default constructor
      * @param {Number} duration duration in frames of the animation
      * @param render what runs per render
+     * @param onCompleteEvent event that occurs after render
      */
-    constructor(duration, render) {
+    constructor(duration, render, onCompleteEvent) {
         super();
         this.maxDuration = duration;
+        this.onCompleteEvent = onCompleteEvent;
         this.durationPassed = 0;
         this.render = render;
     }
@@ -90,7 +92,7 @@ export class Animation extends SynchronousEvent {
                     p5.rect(0, 0, 1800, 300, 150);
                     p5.shadowText(message, 0, 0, 150)
                     p5.pop();
-                });
+                }, onCompleteEvent);
             }
             case ACTIONS.cardPlaced: {
                 // Animation follows the event of placing the card (as the card won't show up on the field until it is placed)
@@ -104,13 +106,14 @@ export class Animation extends SynchronousEvent {
                     p5.stroke(170, transparency);
                     p5.strokeWeight(150);
                     p5.ellipse(coordinate.x, coordinate.y, 220, 220)
-                });
+                }, onCompleteEvent);
             }
         }
     }
 
     handle(p5) {
         if (this.durationPassed === this.maxDuration) {
+            if (this.onCompleteEvent != null) this.onCompleteEvent();
             return true;
         }
         this.render(p5, this.durationPassed);

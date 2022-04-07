@@ -74,16 +74,14 @@ export class ActionHandler {
         switch (action.type) {
             case ACTIONS.switchTurn: {
                 this.game.handOverTurn(action.user);
+                if (!preload) this.pushEvent(Animation.createAnimation(action, this.game));
                 break;
             }
             case ACTIONS.cardPlaced: {
                 this.game.placeCard(action.user, action.handIndex, action.col, action.row);
+                if (!preload) this.pushEvent(Animation.createAnimation(action, this.game));
                 break;
             }
-        }
-        if (!preload) {
-            const event = Animation.createAnimation(action, this.game);
-            this.pushEvent(event);
         }
     }
 }
