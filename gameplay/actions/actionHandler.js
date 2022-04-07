@@ -82,6 +82,10 @@ export class ActionHandler {
                 if (!preload) this.pushEvent(Animation.createAnimation(action, this.game));
                 break;
             }
+            case ACTIONS.cardAction: {
+                this.game.cardAction(action.col, action.row, action.targetCol, action.targetRow, action.actionType)
+                break;
+            }
         }
     }
 }

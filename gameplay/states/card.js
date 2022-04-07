@@ -1,11 +1,16 @@
 /**
  * The class representing the base properties for a card represented in its raw database form, prior to being placed on the playfield.
  */
+import {Attack, CardAction, Move} from "./cardAction";
+import {CARD_ACTIONS} from "../../constants/constants";
+
 export class Card {
 
-    setDefaultGameStates() {
-        this._movesLeft = 0;
-        this._attacksLeft = 0;
+    initActions() {
+        this.actions = {};
+        // TODO: Generify so that different actions are better supported
+        //this.actions[CARD_ACTIONS.attacking] = new Attack();
+        this.actions[CARD_ACTIONS.moving] = new Move();
     }
 
     constructor(name, description, attack, health, movement, range, cost, id) {
@@ -17,7 +22,7 @@ export class Card {
         this._range = range;
         this._cost = cost;
         this._id = id;
-        this.setDefaultGameStates();
+        this.initActions();
     }
 
     get name() {
@@ -108,22 +113,6 @@ export class Card {
         this._id = value;
     }
 
-    get movesLeft() {
-        return this._movesLeft;
-    }
-
-    set movesLeft(value) {
-        this._movesLeft = value;
-    }
-
-    get attacksLeft() {
-        return this._attacksLeft;
-    }
-
-    set attacksLeft(value) {
-        this._attacksLeft = value;
-    }
-
     clone() {
         return new Card(this.name, this.description, this.attack, this.health, this.movement, this.range, this.cost, this.id);
     }
@@ -135,26 +124,9 @@ export class Card {
     }
 
     onTurnSwitch() {
-        this._attacksLeft = 1;
-        this._movesLeft = 1;
-    }
-
-    move(col, row) {
-        this._col = col;
-        this._row = row;
-        this._movesLeft--;
-    }
-
-    validMoveLocations(field) {
-        let locations = [];
-        for (let direction in [1, -1]) {
-            for (let dist = 1; dist <= this.movement; dist++) {
-                const currRow = this.row + dist;
-                if (field[this.col][currRow]) break;
-                locations.push([this.col, currRow]);
-            }
+        for (let action in this.actions) {
+            this.actions[action].currentActions = action.maxActions;
         }
-        return locations;
     }
 }
 

@@ -1,4 +1,12 @@
-import {ACTIONS, CLICK_STATES, COLUMNS, DEFAULT_HP, ROWS} from "../../constants/constants";
+import {
+    ACTIONS,
+    CARD_ACTION_BUTTONS,
+    CARD_ACTIONS,
+    CLICK_STATES,
+    COLUMNS,
+    DEFAULT_HP,
+    ROWS
+} from "../../constants/constants";
 
 export const width = 2000;
 export const height = 1100;
@@ -22,6 +30,8 @@ const cardSeparation = 30;
 const maxCardsPerRow = 4;
 const handDivider = gridDividerSeparation +
     (gridOffset * 2 + (maxCardsPerRow - 1) * cardSeparation + maxCardsPerRow * cardSize);
+
+const actionButtonSize = gridTileSize / 2;
 
 export function flipField(game) {
     return game.self !== game.firstPlayer;
@@ -58,6 +68,38 @@ export function handIndexToCoordinate(index) {
         x: actualX,
         y: actualY
     }
+}
+
+
+/**
+ * Handles rectangle-point collision based on the CORNER mode for rectangles.
+ * @param mx
+ * @param my
+ * @param rx
+ * @param ry
+ * @param rw
+ * @param rh
+ * @returns {boolean}
+ */
+function rectCollision(mx, my, rx, ry, rw, rh) {
+    return mx >= rx && mx <= rx + rw && my >= ry && my <= ry + rh;
+}
+
+function dist(x1, y1, x2, y2) {
+    return Math.sqrt((x2 - x1) * (x2 - x1) + (y2 - y1) * (y2 - y1));
+}
+
+/**
+ * Handles circle-point collision based on the CENTER mode for ellipses.
+ * @param mx
+ * @param my
+ * @param ex
+ * @param ey
+ * @param radius
+ * @returns {boolean}
+ */
+function circleCollision(mx, my, ex, ey, radius) {
+    return dist(mx, my, ex, ey) <= radius;
 }
 
 /**
@@ -157,7 +199,40 @@ export class ClassifiedRenderer {
                 p5.shadowText(card.movement, x + (gridTileSize / 8), y + downOffset, nameSize);
                 p5.shadowText(card.range, x + (gridTileSize * 3 / 8), y + downOffset, nameSize);
         }
+        /**
+         * Actions => Moving, Attacking
+         * @param {Card}card
+         */
+        p5.displayCardActions = (card) => {
+            // (x, y, xLen, yLen, curvature, colour, border, text, textSize)
+            const offsetY = (height - gridTileSize * ROWS) / 2 + gridTileSize * (ROWS - 1);
+            const midLen = handDivider - gridDividerSeparation;
+            const actionCount = Object.keys(card.actions).length;
+            const actionButtonLength = (midLen - gridOffset * (actionCount + 1)) / actionCount;
 
+            let count = 0;
+            for (let id in card.actions) {
+                const action = card.actions[id];
+                const buttonGraphics = CARD_ACTION_BUTTONS[id];
+                if (action.currActionsLeft === 0) {
+                    buttonGraphics.fill = 'rgb(150,150,150)';
+                    buttonGraphics.stroke = 'rgb(70,70,70)';
+                }
+
+                p5.button(gridDividerSeparation + gridOffset * (count + 1) + actionButtonLength * count, offsetY, actionButtonLength, actionButtonSize, 0, buttonGraphics.fill, buttonGraphics.stroke, buttonGraphics.text, actionButtonSize / 3)
+                count++;
+            }
+        }
+        p5.displayTarget = (col, row, fill) => {
+            p5.noFill();
+            p5.strokeWeight(15);
+            p5.stroke('rgba(100,100,100,190)');
+            p5.ellipseMode(p5.CENTER);
+            const coordinate = fieldPositionToCoordinate(col, row);
+            p5.ellipse(coordinate.x + shadowOffset.normal, coordinate.y + shadowOffset.normal, gridTileSize * 4 / 5, gridTileSize * 4 / 5);
+            p5.stroke(fill);
+            p5.ellipse(coordinate.x, coordinate.y, gridTileSize * 4 / 5, gridTileSize * 4 / 5);
+        }
         p5.displayCardOnField = (card, col, row, user, highlight = false) => {
             // Returns the centre of a card on the field
             const coordinate = fieldPositionToCoordinate(col, row);
@@ -247,15 +322,16 @@ export class ClassifiedRenderer {
             const topLeftCorner = fieldPositionToCoordinate(0, ROWS - 1);
             p5.rect(topLeftCorner.x - gridTileSize / 2.0, topLeftCorner.y - gridTileSize / 2.0, gridTileSize * COLUMNS, gridTileSize)
         }
-        p5.button = (x, y, xLen, yLen, colour, text) => {
+        // Corner mode button
+        p5.button = (x, y, xLen, yLen, curvature, colour, border, text, textSize) => {
             p5.rectMode(p5.CORNER);
             p5.strokeWeight(5);
             p5.fill(colour);
-            p5.stroke('#FFFFFF');
+            p5.stroke(border);
 
-            p5.rect(x, y, xLen, yLen, 10, 10);
+            p5.rect(x, y, xLen, yLen, curvature, curvature);
             p5.textAlign(p5.CENTER, p5.CENTER);
-            p5.shadowText(text, x + xLen / 2, y + yLen / 2, 40);
+            p5.shadowText(text, x + xLen / 2, y + yLen / 2, textSize);
         }
     }
 }
@@ -271,6 +347,7 @@ export class ClassifiedSketch {
         this.handler = handler;
         this.loader = loader;
         this.clickState = {type: CLICK_STATES.noClick};
+        this.mouseLocation = {x: 0, y: 0}
     }
 
     preload(p5) {
@@ -313,10 +390,30 @@ export class ClassifiedSketch {
                 }
             }
         }
-
         if (this.clickState.type === CLICK_STATES.cardSelected) {
             const c = this.game.field[this.clickState.col][this.clickState.row];
             p5.displayCardOnField(c, this.clickState.col, displayRow(this.clickState.row, this.game), this.game.firstPlayer, true)
+            if (c.user === this.game.self) {
+
+                switch (this.clickState.action) {
+                    case CARD_ACTIONS.none: {
+                        p5.displayCardActions(c);
+                        break;
+                    }
+                    default: {
+                        const action = c.actions[this.clickState.action];
+                        const targetList = action.getTargets(this.game.field, c);
+                        for (let i = 0; i < targetList.length; i++) {
+                            let colour = 'rgba(255,255,255,255)';
+                            const coordinate = fieldPositionToCoordinate(targetList[i].col, displayRow(targetList[i].row, this.game))
+                            if (circleCollision(this.mouseLocation.x, this.mouseLocation.y, coordinate.x, coordinate.y, gridTileSize * 2 / 5)) {
+                                colour = 'rgba(170,170,170,190)';
+                            }
+                            p5.displayTarget(targetList[i].col, displayRow(targetList[i].row, this.game), colour)
+                        }
+                    }
+                }
+            }
         }
 
         p5.hpBar(DEFAULT_HP, this.game.hp[this.game.self], this.game.cash[this.game.self],
@@ -340,25 +437,11 @@ export class ClassifiedSketch {
 
         const colour = this.game.hasTurn ? 'rgba(171,128,232,0.86)' : 'rgba(192,192,192,0.66)';
         const msg = this.game.hasTurn ? 'Switch Turn!' : "Opponent's Turn!";
-        p5.button(handDivider + gridOffset, cardSize * 0.75, width - handDivider - gridOffset * 2, cardSize * 0.75, colour, msg);
+        p5.button(handDivider + gridOffset, cardSize * 0.75, width - handDivider - gridOffset * 2, cardSize * 0.75, 10, colour, 'rgb(255, 255, 255)', msg, 40);
 
         // KEEP THESE AT THE VERY END
         p5.effectiveBorder();
         this.handler.render(p5); // Handles any ongoing game-state related events in the queue on a one-event-per-frame basis
-    }
-
-    /**
-     * Handles rectangle-point collision based on the CORNER mode for rectangles.
-     * @param mx
-     * @param my
-     * @param rx
-     * @param ry
-     * @param rw
-     * @param rh
-     * @returns {boolean}
-     */
-    rectCollision(mx, my, rx, ry, rw, rh) {
-        return mx >= rx && mx <= rx + rw && my >= ry && my <= ry + rh;
     }
 
     /**
@@ -374,7 +457,7 @@ export class ClassifiedSketch {
                 // Actions that can only be done with a noClick state
                 case CLICK_STATES.noClick: {
                     // Switch Turn
-                    if (this.rectCollision(event.offsetX, event.offsetY, handDivider + gridOffset, cardSize * 0.75, width - handDivider - gridOffset * 2, cardSize * 0.75)) {
+                    if (rectCollision(event.offsetX, event.offsetY, handDivider + gridOffset, cardSize * 0.75, width - handDivider - gridOffset * 2, cardSize * 0.75)) {
                         this.loader.pushAction({
                             type: ACTIONS.switchTurn,
                             user: this.game.opp
@@ -385,7 +468,7 @@ export class ClassifiedSketch {
                     // Dragging for Card Placement
                     for (let i = 0; i < this.game.hand[this.game.self].length; i++) {
                         const coordinate = handIndexToCoordinate(i);
-                        if (this.rectCollision(event.offsetX, event.offsetY, coordinate.x - cardSize / 2.0, coordinate.y - cardSize / 2.0, cardSize, cardSize)) {
+                        if (rectCollision(event.offsetX, event.offsetY, coordinate.x - cardSize / 2.0, coordinate.y - cardSize / 2.0, cardSize, cardSize)) {
                             this.clickState = {
                                 type: CLICK_STATES.cardDragged,
                                 handIndex: i,
@@ -404,14 +487,60 @@ export class ClassifiedSketch {
                     for (let col = 0; col < COLUMNS; col++) {
                         for (let row = 0; row < ROWS; row++) {
                             const fieldCoordinate = fieldPositionToCoordinate(col, displayRow(row, this.game));
-                            if (this.rectCollision(event.offsetX, event.offsetY, fieldCoordinate.x - gridTileSize / 2, fieldCoordinate.y - gridTileSize / 2, gridTileSize, gridTileSize)) {
+                            if (rectCollision(event.offsetX, event.offsetY, fieldCoordinate.x - gridTileSize / 2, fieldCoordinate.y - gridTileSize / 2, gridTileSize, gridTileSize)) {
                                 if (this.game.field[col][row]) {
                                     this.clickState = {
                                         type: CLICK_STATES.cardSelected,
+                                        action: CARD_ACTIONS.none,
                                         col: col,
                                         row: row
                                     }
                                     return;
+                                }
+                            }
+                        }
+                    }
+                    break;
+                }
+                case CLICK_STATES.cardSelected: {
+                    const card = this.game.field[this.clickState.col][this.clickState.row];
+                    if (card.user === this.game.self) {
+                        switch (this.clickState.action) {
+                            case CARD_ACTIONS.none: {
+                                const offsetY = (height - gridTileSize * ROWS) / 2 + gridTileSize * (ROWS - 1);
+                                const midLen = handDivider - gridDividerSeparation;
+                                const actionCount = Object.keys(card.actions).length;
+                                const actionButtonLength = (midLen - gridOffset * (actionCount + 1)) / actionCount;
+
+                                let count = 0;
+                                for (let id in card.actions) {
+                                    if (card.actions[id].currActionsLeft !== 0) {
+                                        if (rectCollision(event.offsetX, event.offsetY, gridDividerSeparation + gridOffset * (count + 1) + actionButtonLength * count, offsetY, actionButtonLength, actionButtonSize)) {
+                                            this.clickState.action = id;
+                                            return;
+                                        }
+                                    }
+                                    count++;
+                                }
+                                break;
+                            }
+                            default: {
+                                const action = card.actions[this.clickState.action];
+                                const targetList = action.getTargets(this.game.field, card);
+                                for (let i = 0; i < targetList.length; i++) {
+                                    const coordinate = fieldPositionToCoordinate(targetList[i].col, displayRow(targetList[i].row, this.game))
+                                    if (circleCollision(this.mouseLocation.x, this.mouseLocation.y, coordinate.x, coordinate.y, gridTileSize * 2 / 5)) {
+                                        this.loader.pushAction({
+                                            type: ACTIONS.cardAction,
+                                            actionType: this.clickState.action,
+                                            col: this.clickState.col,
+                                            row: this.clickState.row,
+                                            targetCol: targetList[i].col,
+                                            targetRow: targetList[i].row
+                                        })
+                                        this.clickState = {type: CLICK_STATES.noClick};
+                                        return;
+                                    }
                                 }
                             }
                         }
@@ -439,7 +568,7 @@ export class ClassifiedSketch {
                     // Don't place on areas that already have a card
                     if (this.game.field[col][displayRow(row, this.game)] == null) {
                         const fieldCoordinate = fieldPositionToCoordinate(col, row);
-                        if (this.rectCollision(coordinate.x, coordinate.y, fieldCoordinate.x - gridTileSize / 2, fieldCoordinate.y - gridTileSize / 2, gridTileSize, gridTileSize)) {
+                        if (rectCollision(coordinate.x, coordinate.y, fieldCoordinate.x - gridTileSize / 2, fieldCoordinate.y - gridTileSize / 2, gridTileSize, gridTileSize)) {
                             this.loader.pushAction({
                                 type: ACTIONS.cardPlaced,
                                 user: this.game.self,
@@ -456,6 +585,8 @@ export class ClassifiedSketch {
     }
 
     mouseMoved(p5, event) {
+        this.mouseLocation.x = event.offsetX;
+        this.mouseLocation.y = event.offsetY;
         if (this.handler.hasPendingEvents()) return;
 
         // Cards dragged that you can't purchase are purely vanity

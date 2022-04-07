@@ -189,4 +189,18 @@ export class GameState {
         this.deck[user].push(this.collection[card.id]);
         this.cash[user] -= card.cost;
     }
+
+    /**
+     * The logic for on-field card actions (Attacking, Moving, etc.)
+     * @param {Number} col the column of the card
+     * @param {Number} row the row of the card
+     * @param {Number} targetCol the column of the card's target
+     * @param {Number} targetRow the row of the card's target
+     * @param {Number} actionID the ID of the action
+     */
+    cardAction(col, row, targetCol, targetRow, actionID) {
+        const card = this.field[col][row];
+        const action = card.actions[actionID];
+        action.onTargetClick(this.field, card, targetCol, targetRow);
+    }
 }
