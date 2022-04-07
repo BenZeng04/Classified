@@ -384,7 +384,6 @@ export class ClassifiedSketch {
 
                     // Dragging for Card Placement
                     for (let i = 0; i < this.game.hand[this.game.self].length; i++) {
-                        if (this.game.hand[this.game.self][i].cost > this.game.cash[this.game.self]) continue; // Don't allow picking up cards you can't purchase
                         const coordinate = handIndexToCoordinate(i);
                         if (this.rectCollision(event.offsetX, event.offsetY, coordinate.x - cardSize / 2.0, coordinate.y - cardSize / 2.0, cardSize, cardSize)) {
                             this.clickState = {
@@ -427,25 +426,28 @@ export class ClassifiedSketch {
     mouseReleased(p5, event) {
         if (this.handler.hasPendingEvents()) return;
 
+        // Don't allow dropping cards too expensive
         if (this.clickState.type === CLICK_STATES.cardDragged) {
             const coordinate = handIndexToCoordinate(this.clickState.handIndex);
             coordinate.x += this.clickState.offsetX;
             coordinate.y += this.clickState.offsetY;
 
             // Both players get to place the card on what appears to them as row index 5 (zero-indexed)
-            const row = ROWS - 1;
-            for (let col = 0; col < COLUMNS; col++) {
-                // Don't place on areas that already have a card
-                if (this.game.field[col][displayRow(row, this.game)] == null) {
-                    const fieldCoordinate = fieldPositionToCoordinate(col, row);
-                    if (this.rectCollision(coordinate.x, coordinate.y, fieldCoordinate.x - gridTileSize / 2, fieldCoordinate.y - gridTileSize / 2, gridTileSize, gridTileSize)) {
-                        this.loader.pushAction({
-                            type: ACTIONS.cardPlaced,
-                            user: this.game.self,
-                            handIndex: this.clickState.handIndex,
-                            col: col,
-                            row: displayRow(row, this.game)
-                        })
+            if (this.game.hand[this.game.self][this.clickState.handIndex].cost <= this.game.cash[this.game.self]) {
+                const row = ROWS - 1;
+                for (let col = 0; col < COLUMNS; col++) {
+                    // Don't place on areas that already have a card
+                    if (this.game.field[col][displayRow(row, this.game)] == null) {
+                        const fieldCoordinate = fieldPositionToCoordinate(col, row);
+                        if (this.rectCollision(coordinate.x, coordinate.y, fieldCoordinate.x - gridTileSize / 2, fieldCoordinate.y - gridTileSize / 2, gridTileSize, gridTileSize)) {
+                            this.loader.pushAction({
+                                type: ACTIONS.cardPlaced,
+                                user: this.game.self,
+                                handIndex: this.clickState.handIndex,
+                                col: col,
+                                row: displayRow(row, this.game)
+                            })
+                        }
                     }
                 }
             }
@@ -456,7 +458,8 @@ export class ClassifiedSketch {
     mouseMoved(p5, event) {
         if (this.handler.hasPendingEvents()) return;
 
-        if (this.clickState.type === CLICK_STATES.cardDragged) {
+        // Cards dragged that you can't purchase are purely vanity
+        if (this.clickState.type === CLICK_STATES.cardDragged && this.game.hand[this.game.self][this.clickState.handIndex].cost <= this.game.cash[this.game.self]) {
             this.clickState.currX = event.offsetX;
             this.clickState.currY = event.offsetY;
             this.clickState.offsetX = this.clickState.currX - this.clickState.initialX;
