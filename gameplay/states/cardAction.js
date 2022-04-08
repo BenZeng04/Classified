@@ -4,12 +4,14 @@
 import {CARD_ACTIONS, ROWS} from "../../constants/constants";
 
 export class CardAction {
+
     constructor(getTargets, onTargetClick, maxActions) {
         this._getTargets = getTargets;
         this._onTargetClick = onTargetClick;
         this._currActionsLeft = maxActions;
         this._maxActions = maxActions;
-    }''
+    }
+
     get getTargets() {
         return this._getTargets;
     }

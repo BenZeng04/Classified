@@ -11,6 +11,9 @@ export class Card {
         // TODO: Generify so that different actions are better supported
         //this.actions[CARD_ACTIONS.attacking] = new Attack();
         this.actions[CARD_ACTIONS.moving] = new Move();
+
+        // Temporary solution for custom card animations that modify the way cards are normally displayed
+        this.display = true;
     }
 
     constructor(name, description, attack, health, movement, range, cost, id) {

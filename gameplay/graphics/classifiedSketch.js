@@ -85,7 +85,7 @@ function rectCollision(mx, my, rx, ry, rw, rh) {
     return mx >= rx && mx <= rx + rw && my >= ry && my <= ry + rh;
 }
 
-function dist(x1, y1, x2, y2) {
+export function dist(x1, y1, x2, y2) {
     return Math.sqrt((x2 - x1) * (x2 - x1) + (y2 - y1) * (y2 - y1));
 }
 
@@ -385,14 +385,14 @@ export class ClassifiedSketch {
                     // Only display cards not being selected
                     if(!(this.clickState.type === CLICK_STATES.cardSelected && this.clickState.row === row && this.clickState.col === col)) {
                         const c = this.game.field[col][row];
-                        p5.displayCardOnField(c, col, displayRow(row, this.game), this.game.firstPlayer)
+                        if (c.display) p5.displayCardOnField(c, col, displayRow(row, this.game), this.game.firstPlayer)
                     }
                 }
             }
         }
         if (this.clickState.type === CLICK_STATES.cardSelected) {
             const c = this.game.field[this.clickState.col][this.clickState.row];
-            p5.displayCardOnField(c, this.clickState.col, displayRow(this.clickState.row, this.game), this.game.firstPlayer, true)
+            if (c.display) p5.displayCardOnField(c, this.clickState.col, displayRow(this.clickState.row, this.game), this.game.firstPlayer, true)
             if (c.user === this.game.self) {
 
                 switch (this.clickState.action) {

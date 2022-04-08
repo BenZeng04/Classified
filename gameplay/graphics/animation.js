@@ -1,6 +1,6 @@
-import {ACTIONS} from "../../constants/constants";
+import {ACTIONS, CARD_ACTIONS} from "../../constants/constants";
 import {displayRow, fieldPositionToCoordinate, height, width} from "./classifiedSketch";
-
+import {dist} from "./classifiedSketch"
 /**
  * A Helper class to handle synchronous events that occur on a per-frame basis.
  */
@@ -107,6 +107,24 @@ export class Animation extends SynchronousEvent {
                     p5.strokeWeight(150);
                     p5.ellipse(coordinate.x, coordinate.y, 220, 220)
                 }, onCompleteEvent);
+            }
+            case ACTIONS.cardAction: {
+                // TODO: Current way of handling animations for actions is spaghetti.
+                switch (parseInt(action.actionType)) {
+                    case CARD_ACTIONS.moving: {
+                        // Duration of animation depends on distance moved
+                        const framesPerTile = 5;
+                        const distance = dist(action.col, action.row, action.targetCol, action.targetRow);
+                        const time = Math.ceil(distance * framesPerTile);
+                        return new Animation(time, (p5, duration) => {
+                            const card = game.field[action.targetCol][action.targetRow];
+                            const progress = duration / time;
+                            const newCol = action.col + (action.targetCol - action.col) * progress;
+                            const newRow = action.row + (action.targetRow - action.row) * progress;
+                            p5.displayCardOnField(card, newCol, displayRow(newRow, game), game.firstPlayer);
+                        }, onCompleteEvent)
+                    }
+                }
             }
         }
     }

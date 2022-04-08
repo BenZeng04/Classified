@@ -185,7 +185,7 @@ export class GameState {
 
         this.field[col][row] = card;
         card.place(user, col, row);
-        // "Restashing"
+        // Re-stashing cards back into deck
         this.deck[user].push(this.collection[card.id]);
         this.cash[user] -= card.cost;
     }
