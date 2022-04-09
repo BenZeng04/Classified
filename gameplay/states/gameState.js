@@ -3,6 +3,7 @@ import {COLUMNS, DEFAULT_HP, ROWS} from "../../constants/constants";
 /**
  * Handles all variables attributed to the non-graphical state of the game, as well as handling and updating these variables based on all sets of non-graphical or interface related actions that can occur during gameplay.
  * When handling movement & tile-based logic, use absolute row instead of relative (flipped).
+ * By itself, logic for card actions & updates should be handled in card.js - gameState.js should only forward such actions
  */
 
 export class GameState {
@@ -184,7 +185,7 @@ export class GameState {
         this.hand[user].splice(handIndex, 1);
 
         this.field[col][row] = card;
-        card.place(user, col, row);
+        card.place(this, user, col, row);
         // Re-stashing cards back into deck
         this.deck[user].push(this.collection[card.id]);
         this.cash[user] -= card.cost;
@@ -201,6 +202,6 @@ export class GameState {
     cardAction(col, row, targetCol, targetRow, actionID) {
         const card = this.field[col][row];
         const action = card.actions[actionID];
-        action.onTargetClick(this.field, card, targetCol, targetRow);
+        action.onTargetClick(this, card, targetCol, targetRow);
     }
 }

@@ -120,22 +120,51 @@ export class Card {
         return new Card(this.name, this.description, this.attack, this.health, this.movement, this.range, this.cost, this.id);
     }
 
-    place(user, col, row) {
+    place(game, user, col, row) {
         this._user = user;
         this._col = col;
         this._row = row;
     }
 
-    onTurnSwitch() {
+    onTurnSwitch(game) {
         for (let action in this.actions) {
             this.actions[action].currActionsLeft = this.actions[action].maxActions;
         }
     }
 
-    onMove() {
+    onMove(game) {
         this.actions[CARD_ACTIONS.moving].currActionsLeft--;
         // Cannot move & attack in the same turn.
         this.actions[CARD_ACTIONS.attacking].currActionsLeft = 0;
+    }
+
+    onAttack(game) {
+        this.actions[CARD_ACTIONS.attacking].currActionsLeft--;
+        // Cannot move & attack in the same turn.
+        this.actions[CARD_ACTIONS.moving].currActionsLeft = 0;
+    }
+
+    onDeath(game) {
+        // To override / implement
+    }
+
+    relocate(game, col, row) {
+        game.field[this.col][this.row] = undefined;
+        this._col = col;
+        this._row = row;
+        game.field[col][row] = this;
+    }
+
+    takeDamage(game, attacker) {
+        this.health -= attacker.attack;
+        if (this.health <= 0) {
+            this.onDeath(game);
+            this.removeFromGame(game);
+        }
+    }
+
+    removeFromGame(game) {
+        game.field[this.col][this.row] = undefined;
     }
 }
 

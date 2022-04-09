@@ -124,6 +124,12 @@ export class Animation extends SynchronousEvent {
                             p5.displayCardOnField(card, newCol, displayRow(newRow, game), game.firstPlayer);
                         }, onCompleteEvent)
                     }
+                    //
+                    case CARD_ACTIONS.attacking: {
+                        return new Animation(1, (p5, duration) => {
+                            // TODO: Create an animation where the card "charges" up and backs up
+                        }, onCompleteEvent)
+                    }
                 }
             }
         }

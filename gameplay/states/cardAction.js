@@ -47,21 +47,22 @@ export class CardAction {
 
 export class Attack extends CardAction {
     constructor() {
-        super((field, card) => {
+        super((game, card) => {
                 let locations = [];
                 for (let direction = -1; direction <= 1; direction += 2) {
-                    for (let dist = 1; dist <= card.movement; dist++) {
+                    for (let dist = 1; dist <= card.range; dist++) {
                         const currRow = card.row + dist * direction;
                         if (currRow < 0 || currRow >= ROWS) break;
-                        if (field[card.col][currRow] && field[card.col][currRow].user !== card.user) {
+                        if (game.field[card.col][currRow] && game.field[card.col][currRow].user !== card.user) {
                             locations.push({col: card.col, row: currRow});
                             break;
                         }
                     }
                 }
                 return locations;
-            }, (field, card, col, row) => {
-                // TODO
+            }, (game, card, col, row) => {
+                game.field[col][row].takeDamage(game, card);
+                card.onAttack(game);
             },
             1);
     }
@@ -69,23 +70,20 @@ export class Attack extends CardAction {
 
 export class Move extends CardAction {
     constructor() {
-        super((field, card) => {
+        super((game, card) => {
                 let locations = [];
                 for (let direction = -1; direction <= 1; direction += 2) {
                     for (let dist = 1; dist <= card.movement; dist++) {
                         const currRow = card.row + dist * direction;
                         if (currRow < 0 || currRow >= ROWS) break;
-                        if (field[card.col][currRow]) break;
+                        if (game.field[card.col][currRow]) break;
                         locations.push({col: card.col, row: currRow});
                     }
                 }
                 return locations;
-            }, (field, card, col, row) => {
-                field[card.col][card.row] = undefined;
-                card.col = col;
-                card.row = row;
-                field[col][row] = card;
-                card.onMove();
+            }, (game, card, col, row) => {
+                card.relocate(game, col, row);
+                card.onMove(game);
             },
             1)
     }

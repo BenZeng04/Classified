@@ -398,7 +398,7 @@ export class ClassifiedSketch {
                 if (this.clickState.action === CARD_ACTIONS.none) p5.displayCardActions(c);
                 else {
                     const action = c.actions[this.clickState.action];
-                    const targetList = action.getTargets(this.game.field, c);
+                    const targetList = action.getTargets(this.game, c);
                     for (let i = 0; i < targetList.length; i++) {
                         const coordinate = fieldPositionToCoordinate(targetList[i].col, displayRow(targetList[i].row, this.game))
                         let colour = circleCollision(this.mouseLocation.x, this.mouseLocation.y, coordinate.x, coordinate.y, gridTileSize * 2 / 5)? 'rgba(170,170,170,190)': 'rgba(255,255,255,255)';
@@ -520,7 +520,7 @@ export class ClassifiedSketch {
                             default: {
                                 // Selecting an action's target
                                 const action = card.actions[this.clickState.action];
-                                const targetList = action.getTargets(this.game.field, card);
+                                const targetList = action.getTargets(this.game, card);
                                 for (let i = 0; i < targetList.length; i++) {
                                     const coordinate = fieldPositionToCoordinate(targetList[i].col, displayRow(targetList[i].row, this.game))
                                     if (circleCollision(this.mouseLocation.x, this.mouseLocation.y, coordinate.x, coordinate.y, gridTileSize * 2 / 5)) {
