@@ -48,7 +48,18 @@ export class CardAction {
 export class Attack extends CardAction {
     constructor() {
         super((field, card) => {
-                return undefined; // TODO
+                let locations = [];
+                for (let direction = -1; direction <= 1; direction += 2) {
+                    for (let dist = 1; dist <= card.movement; dist++) {
+                        const currRow = card.row + dist * direction;
+                        if (currRow < 0 || currRow >= ROWS) break;
+                        if (field[card.col][currRow] && field[card.col][currRow].user !== card.user) {
+                            locations.push({col: card.col, row: currRow});
+                            break;
+                        }
+                    }
+                }
+                return locations;
             }, (field, card, col, row) => {
                 // TODO
             },
@@ -74,9 +85,7 @@ export class Move extends CardAction {
                 card.col = col;
                 card.row = row;
                 field[col][row] = card;
-                this.currActionsLeft--;
-                // Cannot move & attack in the same turn.
-                card.actions[CARD_ACTIONS.attacking].currActionsLeft = 0;
+                card.onMove();
             },
             1)
     }

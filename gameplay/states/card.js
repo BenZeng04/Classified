@@ -128,8 +128,14 @@ export class Card {
 
     onTurnSwitch() {
         for (let action in this.actions) {
-            this.actions[action].currentActions = this.actions[action].maxActions;
+            this.actions[action].currActionsLeft = this.actions[action].maxActions;
         }
+    }
+
+    onMove() {
+        this.actions[CARD_ACTIONS.moving].currActionsLeft--;
+        // Cannot move & attack in the same turn.
+        this.actions[CARD_ACTIONS.attacking].currActionsLeft = 0;
     }
 }
 
