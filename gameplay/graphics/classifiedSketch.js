@@ -395,23 +395,14 @@ export class ClassifiedSketch {
             const c = this.game.field[this.clickState.col][this.clickState.row];
             if (c.display) p5.displayCardOnField(c, this.clickState.col, displayRow(this.clickState.row, this.game), this.game.firstPlayer, true)
             if (c.user === this.game.self) {
-
-                switch (this.clickState.action) {
-                    case CARD_ACTIONS.none: {
-                        p5.displayCardActions(c);
-                        break;
-                    }
-                    default: {
-                        const action = c.actions[this.clickState.action];
-                        const targetList = action.getTargets(this.game.field, c);
-                        for (let i = 0; i < targetList.length; i++) {
-                            let colour = 'rgba(255,255,255,255)';
-                            const coordinate = fieldPositionToCoordinate(targetList[i].col, displayRow(targetList[i].row, this.game))
-                            if (circleCollision(this.mouseLocation.x, this.mouseLocation.y, coordinate.x, coordinate.y, gridTileSize * 2 / 5)) {
-                                colour = 'rgba(170,170,170,190)';
-                            }
-                            p5.displayTarget(targetList[i].col, displayRow(targetList[i].row, this.game), colour)
-                        }
+                if (this.clickState.action === CARD_ACTIONS.none) p5.displayCardActions(c);
+                else {
+                    const action = c.actions[this.clickState.action];
+                    const targetList = action.getTargets(this.game.field, c);
+                    for (let i = 0; i < targetList.length; i++) {
+                        const coordinate = fieldPositionToCoordinate(targetList[i].col, displayRow(targetList[i].row, this.game))
+                        let colour = circleCollision(this.mouseLocation.x, this.mouseLocation.y, coordinate.x, coordinate.y, gridTileSize * 2 / 5)? 'rgba(170,170,170,190)': 'rgba(255,255,255,255)';
+                        p5.displayTarget(targetList[i].col, displayRow(targetList[i].row, this.game), colour)
                     }
                 }
             }
@@ -508,6 +499,7 @@ export class ClassifiedSketch {
                     if (card.user === this.game.self) {
                         switch (this.clickState.action) {
                             case CARD_ACTIONS.none: {
+                                // In the action menu / GUI - selecting an action to perform
                                 const offsetY = (height - gridTileSize * ROWS) / 2 + gridTileSize * (ROWS - 1);
                                 const midLen = handDivider - gridDividerSeparation;
                                 const actionCount = Object.keys(card.actions).length;
@@ -526,6 +518,7 @@ export class ClassifiedSketch {
                                 break;
                             }
                             default: {
+                                // Selecting an action's target
                                 const action = card.actions[this.clickState.action];
                                 const targetList = action.getTargets(this.game.field, card);
                                 for (let i = 0; i < targetList.length; i++) {

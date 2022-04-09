@@ -115,10 +115,10 @@ export class Animation extends SynchronousEvent {
                         // Duration of animation depends on distance moved
                         const framesPerTile = 5;
                         const distance = dist(action.col, action.row, action.targetCol, action.targetRow);
-                        const time = Math.ceil(distance * framesPerTile);
+                        const time = Math.floor(distance * framesPerTile);
                         return new Animation(time, (p5, duration) => {
                             const card = game.field[action.targetCol][action.targetRow];
-                            const progress = duration / time;
+                            const progress = Math.min(1, duration / time);
                             const newCol = action.col + (action.targetCol - action.col) * progress;
                             const newRow = action.row + (action.targetRow - action.row) * progress;
                             p5.displayCardOnField(card, newCol, displayRow(newRow, game), game.firstPlayer);
@@ -130,11 +130,11 @@ export class Animation extends SynchronousEvent {
     }
 
     handle(p5) {
+        this.render(p5, this.durationPassed);
         if (this.durationPassed === this.maxDuration) {
             if (this.onCompleteEvent != null) this.onCompleteEvent();
             return true;
         }
-        this.render(p5, this.durationPassed);
         this.durationPassed++;
         return false;
     }
