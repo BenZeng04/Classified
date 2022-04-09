@@ -211,9 +211,7 @@ export class ClassifiedRenderer {
             const actionButtonLength = (midLen - gridOffset * (actionCount + 1)) / actionCount;
 
             let count = 0;
-            console.log(CARD_ACTION_BUTTONS)
             for (let id in card.actions) {
-                console.log(card.actions[id])
                 const action = card.actions[id];
                 const buttonGraphics = CARD_ACTION_BUTTONS[id];
                 let fill = buttonGraphics.fill, stroke = buttonGraphics.stroke;

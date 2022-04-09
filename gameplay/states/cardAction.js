@@ -60,7 +60,7 @@ export class Move extends CardAction {
     constructor() {
         super((field, card) => {
                 let locations = [];
-                for (let direction in [1, -1]) {
+                for (let direction = -1; direction <= 1; direction += 2) {
                     for (let dist = 1; dist <= card.movement; dist++) {
                         const currRow = card.row + dist * direction;
                         if (currRow < 0 || currRow >= ROWS) break;
