@@ -9,7 +9,7 @@ export class Card {
     initActions() {
         this.actions = {};
         // TODO: Generify so that different actions are better supported
-        //this.actions[CARD_ACTIONS.attacking] = new Attack();
+        this.actions[CARD_ACTIONS.attacking] = new Attack();
         this.actions[CARD_ACTIONS.moving] = new Move();
 
         // Temporary solution for custom card animations that modify the way cards are normally displayed
@@ -128,7 +128,7 @@ export class Card {
 
     onTurnSwitch() {
         for (let action in this.actions) {
-            this.actions[action].currentActions = action.maxActions;
+            this.actions[action].currentActions = this.actions[action].maxActions;
         }
     }
 }

@@ -211,15 +211,18 @@ export class ClassifiedRenderer {
             const actionButtonLength = (midLen - gridOffset * (actionCount + 1)) / actionCount;
 
             let count = 0;
+            console.log(CARD_ACTION_BUTTONS)
             for (let id in card.actions) {
+                console.log(card.actions[id])
                 const action = card.actions[id];
                 const buttonGraphics = CARD_ACTION_BUTTONS[id];
+                let fill = buttonGraphics.fill, stroke = buttonGraphics.stroke;
                 if (action.currActionsLeft === 0) {
-                    buttonGraphics.fill = 'rgb(150,150,150)';
-                    buttonGraphics.stroke = 'rgb(70,70,70)';
+                    fill = 'rgb(150,150,150)';
+                    stroke = 'rgb(70,70,70)';
                 }
 
-                p5.button(gridDividerSeparation + gridOffset * (count + 1) + actionButtonLength * count, offsetY, actionButtonLength, actionButtonSize, 0, buttonGraphics.fill, buttonGraphics.stroke, buttonGraphics.text, actionButtonSize / 3)
+                p5.button(gridDividerSeparation + gridOffset * (count + 1) + actionButtonLength * count, offsetY, actionButtonLength, actionButtonSize, 0, fill, stroke, buttonGraphics.text, actionButtonSize / 3)
                 count++;
             }
         }

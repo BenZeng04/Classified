@@ -75,6 +75,8 @@ export class Move extends CardAction {
                 card.row = row;
                 field[col][row] = card;
                 this.currActionsLeft--;
+                // Cannot move & attack in the same turn.
+                card.actions[CARD_ACTIONS.attacking].currActionsLeft = 0;
             },
             1)
     }
