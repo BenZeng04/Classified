@@ -117,7 +117,7 @@ export class Animation extends SynchronousEvent {
                         const distance = dist(action.col, action.row, action.targetCol, action.targetRow);
                         const time = Math.floor(distance * framesPerTile);
                         return new Animation(time, (p5, duration) => {
-                            const card = game.field[action.targetCol][action.targetRow];
+                            const card = game.field[action.col][action.row];
                             const progress = Math.min(1, duration / time);
                             const newCol = action.col + (action.targetCol - action.col) * progress;
                             const newRow = action.row + (action.targetRow - action.row) * progress;
@@ -126,8 +126,33 @@ export class Animation extends SynchronousEvent {
                     }
                     //
                     case CARD_ACTIONS.attacking: {
-                        return new Animation(1, (p5, duration) => {
-                            // TODO: Create an animation where the card "charges" up and backs up
+                        const framesPerTile = 2.5;
+                        const distance = dist(action.col, action.row, action.targetCol, action.targetRow);
+                        const time = Math.floor(distance * framesPerTile);
+                        return new Animation(time + Math.max(time, 40), (p5, duration) => {
+                            // Animation where the card "charges" up, and then backs up
+                            const card = game.field[action.col][action.row];
+                            const progress = duration > time? Math.max(0, 2 - duration / time): Math.min(1, duration / time);
+                            const newCol = action.col + (action.targetCol - action.col) * progress;
+                            const newRow = action.row + (action.targetRow - action.row) * progress;
+                            p5.displayCardOnField(card, newCol, displayRow(newRow, game), game.firstPlayer);
+
+                            if (duration > time) {
+                                // Display impact of attack
+                                const transparency = 240 - (duration - time) * 6;
+                                const fieldImpactTransparency = 40 - (duration - time);
+                                p5.fill(170, 0, 0, transparency);
+                                p5.stroke(255, 0, 0, transparency);
+                                p5.strokeWeight(150);
+
+                                const coordinate = fieldPositionToCoordinate(action.targetCol, displayRow(action.targetRow, game));
+                                p5.ellipse(coordinate.x, coordinate.y, 220, 220)
+
+                                p5.noStroke();
+                                p5.fill(255, 0, 0, fieldImpactTransparency);
+                                p5.rectMode(p5.CORNER);
+                                p5.rect(0, 0, width, height);
+                            }
                         }, onCompleteEvent)
                     }
                 }

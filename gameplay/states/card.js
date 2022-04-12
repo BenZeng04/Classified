@@ -58,6 +58,10 @@ export class Card {
 
     set health(value) {
         this._health = value;
+        if (this.health <= 0) {
+            this.onDeath(this.game);
+            this.removeFromGame(this.game);
+        }
     }
 
     get movement() {
@@ -124,47 +128,44 @@ export class Card {
         this._user = user;
         this._col = col;
         this._row = row;
+        this.game = game;
     }
 
-    onTurnSwitch(game) {
+    onTurnSwitch() {
         for (let action in this.actions) {
             this.actions[action].currActionsLeft = this.actions[action].maxActions;
         }
     }
 
-    onMove(game) {
+    onMove() {
         this.actions[CARD_ACTIONS.moving].currActionsLeft--;
         // Cannot move & attack in the same turn.
         this.actions[CARD_ACTIONS.attacking].currActionsLeft = 0;
     }
 
-    onAttack(game) {
+    onAttack() {
         this.actions[CARD_ACTIONS.attacking].currActionsLeft--;
         // Cannot move & attack in the same turn.
         this.actions[CARD_ACTIONS.moving].currActionsLeft = 0;
     }
 
-    onDeath(game) {
+    onDeath() {
         // To override / implement
     }
 
-    relocate(game, col, row) {
-        game.field[this.col][this.row] = undefined;
+    relocate(col, row) {
+        this.game.field[this.col][this.row] = undefined;
         this._col = col;
         this._row = row;
-        game.field[col][row] = this;
+        this.game.field[col][row] = this;
     }
 
-    takeDamage(game, attacker) {
+    takeDamage(attacker) {
         this.health -= attacker.attack;
-        if (this.health <= 0) {
-            this.onDeath(game);
-            this.removeFromGame(game);
-        }
     }
 
-    removeFromGame(game) {
-        game.field[this.col][this.row] = undefined;
+    removeFromGame() {
+        this.game.field[this.col][this.row] = undefined;
     }
 }
 

@@ -84,11 +84,13 @@ export class ActionHandler {
             }
             case ACTIONS.cardAction: {
                 const card = this.game.field[action.col][action.row];
-                this.game.cardAction(action.col, action.row, action.targetCol, action.targetRow, action.actionType)
                 if (!preload) {
                     card.display = false;
-                    this.pushEvent(Animation.createAnimation(action, this.game, () => card.display = true));
-                }
+                    this.pushEvent(Animation.createAnimation(action, this.game, () => {
+                        card.display = true;
+                        this.game.cardAction(action.col, action.row, action.targetCol, action.targetRow, action.actionType);
+                    }));
+                } else this.game.cardAction(action.col, action.row, action.targetCol, action.targetRow, action.actionType);
                 break;
             }
         }

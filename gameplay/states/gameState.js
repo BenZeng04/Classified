@@ -202,6 +202,6 @@ export class GameState {
     cardAction(col, row, targetCol, targetRow, actionID) {
         const card = this.field[col][row];
         const action = card.actions[actionID];
-        action.onTargetClick(this, card, targetCol, targetRow);
+        action.onTargetClick(card, targetCol, targetRow);
     }
 }

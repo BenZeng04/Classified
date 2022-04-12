@@ -47,7 +47,8 @@ export class CardAction {
 
 export class Attack extends CardAction {
     constructor() {
-        super((game, card) => {
+        super((card) => {
+                const game = card.game;
                 let locations = [];
                 for (let direction = -1; direction <= 1; direction += 2) {
                     for (let dist = 1; dist <= card.range; dist++) {
@@ -60,9 +61,10 @@ export class Attack extends CardAction {
                     }
                 }
                 return locations;
-            }, (game, card, col, row) => {
-                game.field[col][row].takeDamage(game, card);
-                card.onAttack(game);
+            }, (card, col, row) => {
+                const game = card.game;
+                game.field[col][row].takeDamage(card);
+                card.onAttack();
             },
             1);
     }
@@ -70,7 +72,8 @@ export class Attack extends CardAction {
 
 export class Move extends CardAction {
     constructor() {
-        super((game, card) => {
+        super((card) => {
+            const game = card.game;
                 let locations = [];
                 for (let direction = -1; direction <= 1; direction += 2) {
                     for (let dist = 1; dist <= card.movement; dist++) {
@@ -80,10 +83,11 @@ export class Move extends CardAction {
                         locations.push({col: card.col, row: currRow});
                     }
                 }
+                console.log(locations)
                 return locations;
-            }, (game, card, col, row) => {
-                card.relocate(game, col, row);
-                card.onMove(game);
+            }, (card, col, row) => {
+                card.relocate(col, row);
+                card.onMove();
             },
             1)
     }
