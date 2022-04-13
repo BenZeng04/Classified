@@ -10,6 +10,7 @@ A handy stack list for implementations per new action:
         (As well as checks if the action is valid (I.E. Does the user have enough cash to place a card?)) (ClassifiedSketch)
 - Handle processing reading the action from database (ActionHandler)
 - Handle updating game state from action (GameState)
+    - Updates to the game state should ABSOLUTELY NEVER create new server-side actions (I.E. if a card being placed ends up placing another card, that 2nd card's placement should be handled locally and NOT pushed)
 - Handle animating the action when received (Animation)
 TODO: Server side: handle if performing the action is possible or not using rules
  */
@@ -43,7 +44,10 @@ export class ActionHandler {
     }
 
     pushEvent(evt) {
-        this.eventQueue.add(evt);
+        if (this.eventQueue.isEmpty()) {
+            evt.modifyGameState(); // Modify immediately if the event queue is empty (Which will almost always be the case unless there is lag on the opponent's side in passing actions to you)
+            evt.gameModificationFrame = -1; // Set to a frame that will never be reached
+        } this.eventQueue.add(evt);
     }
 
     /**
@@ -71,28 +75,25 @@ export class ActionHandler {
      * @param preload Whether the action is preloaded (already happened and user is refreshing game tab) - this will determine whether to play an animation or not
      */
     processAction(action, preload = false) {
+        let modifyGameState;
         switch (action.type) {
             case ACTIONS.switchTurn: {
-                this.game.handOverTurn(action.user);
-                if (!preload) this.pushEvent(Animation.createAnimation(action, this.game));
+                modifyGameState = () => this.game.handOverTurn(action.user);
                 break;
             }
             case ACTIONS.cardPlaced: {
-                this.game.placeCard(action.user, action.handIndex, action.col, action.row);
-                if (!preload) this.pushEvent(Animation.createAnimation(action, this.game));
+                modifyGameState = () => this.game.placeCard(action.user, action.handIndex, action.col, action.row);
                 break;
             }
             case ACTIONS.cardAction: {
-                const card = this.game.field[action.col][action.row];
-                if (!preload) {
-                    card.display = false;
-                    this.pushEvent(Animation.createAnimation(action, this.game, () => {
-                        card.display = true;
-                        this.game.cardAction(action.col, action.row, action.targetCol, action.targetRow, action.actionType);
-                    }));
-                } else this.game.cardAction(action.col, action.row, action.targetCol, action.targetRow, action.actionType);
+                modifyGameState = () => this.game.cardAction(action.col, action.row, action.targetCol, action.targetRow, action.actionType);
                 break;
             }
+            default: {
+                throw new Error("Unsupported Action.");
+            }
         }
+        if (preload) modifyGameState();
+        else this.pushEvent(Animation.createAnimation(action, this.game, modifyGameState));
     }
 }

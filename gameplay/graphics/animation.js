@@ -35,22 +35,32 @@ export class SpontaneousEvent extends SynchronousEvent {
 }
 
 export class Animation extends SynchronousEvent {
-
+    static BEFORE = 0;
+    static DURING = 1;
+    static AFTER = 2;
     /**
      * Default constructor
      * @param {Number} duration duration in frames of the animation
      * @param render what runs per render
-     * @param onCompleteEvent event that occurs after render
+     * @param modifyGameState event that occurs before, during, or after render
+     * @param gameModificationPeriod whether the event occurs before, during, or after render
+     * @param gameModificationFrame the frame at which the event occurs, if it is during render
      */
-    constructor(duration, render, onCompleteEvent) {
+    constructor(duration, render, modifyGameState, gameModificationPeriod, gameModificationFrame = undefined) {
         super();
         this.maxDuration = duration;
-        this.onCompleteEvent = onCompleteEvent;
+        this.modifyGameState = modifyGameState;
+        this.gameModificationPeriod = gameModificationPeriod;
+        this.gameModificationFrame = gameModificationFrame;
+        if (this.gameModificationPeriod === Animation.AFTER)
+            this.gameModificationFrame = duration;
+        else if (this.gameModificationFrame === Animation.BEFORE)
+            this.gameModificationFrame = 0;
         this.durationPassed = 0;
-        this.render = render;
+        this.render = render; // All frames in the range [0, maxDuration] will be iterated over
     }
 
-    static createAnimation(action, game, onCompleteEvent) {
+    static createAnimation(action, game, modifyGameState) {
         switch (action.type) {
             case ACTIONS.switchTurn: {
                 return new Animation(80, (p5, duration) => {
@@ -92,7 +102,7 @@ export class Animation extends SynchronousEvent {
                     p5.rect(0, 0, 1800, 300, 150);
                     p5.shadowText(message, 0, 0, 150)
                     p5.pop();
-                }, onCompleteEvent);
+                }, modifyGameState, this.AFTER);
             }
             case ACTIONS.cardPlaced: {
                 // Animation follows the event of placing the card (as the card won't show up on the field until it is placed)
@@ -106,10 +116,9 @@ export class Animation extends SynchronousEvent {
                     p5.stroke(170, transparency);
                     p5.strokeWeight(150);
                     p5.ellipse(coordinate.x, coordinate.y, 220, 220)
-                }, onCompleteEvent);
+                }, modifyGameState, this.BEFORE);
             }
             case ACTIONS.cardAction: {
-                // TODO: Current way of handling animations for actions is spaghetti.
                 switch (parseInt(action.actionType)) {
                     case CARD_ACTIONS.moving: {
                         // Duration of animation depends on distance moved
@@ -118,13 +127,17 @@ export class Animation extends SynchronousEvent {
                         const time = Math.floor(distance * framesPerTile);
                         return new Animation(time, (p5, duration) => {
                             const card = game.field[action.col][action.row];
+
+                            if (duration === 0) card.display = false;
+
                             const progress = Math.min(1, duration / time);
                             const newCol = action.col + (action.targetCol - action.col) * progress;
                             const newRow = action.row + (action.targetRow - action.row) * progress;
                             p5.displayCardOnField(card, newCol, displayRow(newRow, game), game.firstPlayer);
-                        }, onCompleteEvent)
+
+                            if (duration === time) card.display = true;
+                        }, modifyGameState, this.AFTER)
                     }
-                    //
                     case CARD_ACTIONS.attacking: {
                         const framesPerTile = 2.5;
                         const distance = dist(action.col, action.row, action.targetCol, action.targetRow);
@@ -132,6 +145,9 @@ export class Animation extends SynchronousEvent {
                         return new Animation(time + Math.max(time, 40), (p5, duration) => {
                             // Animation where the card "charges" up, and then backs up
                             const card = game.field[action.col][action.row];
+
+                            if (duration === 0) card.display = false;
+
                             const progress = duration > time? Math.max(0, 2 - duration / time): Math.min(1, duration / time);
                             const newCol = action.col + (action.targetCol - action.col) * progress;
                             const newRow = action.row + (action.targetRow - action.row) * progress;
@@ -153,7 +169,9 @@ export class Animation extends SynchronousEvent {
                                 p5.rectMode(p5.CORNER);
                                 p5.rect(0, 0, width, height);
                             }
-                        }, onCompleteEvent)
+
+                            if (duration === time + Math.max(time, 40)) card.display = true;
+                        }, modifyGameState, this.DURING, time)
                     }
                 }
             }
@@ -162,10 +180,10 @@ export class Animation extends SynchronousEvent {
 
     handle(p5) {
         this.render(p5, this.durationPassed);
-        if (this.durationPassed === this.maxDuration) {
-            if (this.onCompleteEvent != null) this.onCompleteEvent();
-            return true;
+        if (this.durationPassed === this.gameModificationFrame) {
+            if (this.modifyGameState != null) this.modifyGameState();
         }
+        if (this.durationPassed === this.maxDuration) return true;
         this.durationPassed++;
         return false;
     }
