@@ -77,6 +77,10 @@ export class ActionHandler {
     processAction(action, preload = false) {
         let modifyGameState;
         switch (action.type) {
+            case ACTIONS.gameStart: {
+                modifyGameState = () => {}; // Null action
+                break;
+            }
             case ACTIONS.switchTurn: {
                 modifyGameState = () => this.game.handOverTurn(action.user);
                 break;
