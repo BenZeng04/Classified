@@ -1,7 +1,7 @@
 /**
  * Wrapper class for actions like attacking and moving to generify code structure
  */
-import {CARD_ACTIONS, ROWS} from "../../constants/constants";
+import {CARD_ACTIONS, COLUMNS, ROWS} from "../../constants/constants";
 import {displayRow, flipField} from "../graphics/classifiedSketch";
 
 export class CardAction {
@@ -47,7 +47,7 @@ export class CardAction {
 }
 
 export class Attack extends CardAction {
-    static PLAYER = {col: null, row: null};
+
     constructor() {
         super((card) => {
                 const game = card.game;
@@ -61,7 +61,7 @@ export class Attack extends CardAction {
                         const currRow = card.row + dist * direction;
                         if (currRow < lowBound || currRow > highBound) break;
                         if (currRow === playerRow) {
-                            locations.push(Attack.PLAYER);
+                            locations.push({col: card.col, row: currRow});
                         } else if (game.field[card.col][currRow] && game.field[card.col][currRow].user !== card.user) {
                             locations.push({col: card.col, row: currRow});
                             break;
@@ -71,7 +71,10 @@ export class Attack extends CardAction {
                 return locations;
             }, (card, col, row) => {
                 const game = card.game;
-                game.field[col][row].takeDamage(card);
+                if (row < 0 || row >= ROWS) { // Only state where this is possible is if the card is attacking the other player
+                    const cardOpponent = card.user === game.self? game.opp: game.self;
+                    game.userTakeDamage(cardOpponent, card);
+                } else game.field[col][row].takeDamage(card);
                 card.onAttack();
             },
             1);

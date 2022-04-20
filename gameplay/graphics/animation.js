@@ -54,7 +54,7 @@ export class Animation extends SynchronousEvent {
         this.gameModificationFrame = gameModificationFrame;
         if (this.gameModificationPeriod === Animation.AFTER)
             this.gameModificationFrame = duration;
-        else if (this.gameModificationFrame === Animation.BEFORE)
+        else if (this.gameModificationPeriod === Animation.BEFORE)
             this.gameModificationFrame = 0;
         this.durationPassed = 0;
         this.render = render; // All frames in the range [0, maxDuration] will be iterated over

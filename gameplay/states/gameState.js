@@ -117,6 +117,7 @@ export class GameState {
         this._opp = opp;
         this._firstPlayer = firstPlayer;
         this._deck = deck;
+        this._gameOver = false;
         this._hasTurn = false; // Set to false for now, will be initialized when the turn gets passed to one of the two players via the Database
         this._hand = {
             [self]: [],
@@ -203,5 +204,18 @@ export class GameState {
         const card = this.field[col][row];
         const action = card.actions[actionID];
         action.onTargetClick(card, targetCol, targetRow);
+    }
+
+    /**
+     * The logic for when one of the two users takes damage from a card.
+     * @param {String} user The UID of the user being attacked
+     * @param {Card} card The card instance of the attacker
+     */
+    userTakeDamage(user, card) {
+        this.hp[user] -= card.attack;
+        if (this.hp[user] <= 0) {
+            this.hp[user] = 0;
+            this.hasTurn = false; // No actions should be allowed to be made after the game is over.
+        }
     }
 }

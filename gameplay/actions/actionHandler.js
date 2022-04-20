@@ -47,7 +47,8 @@ export class ActionHandler {
         if (this.eventQueue.isEmpty() && evt.gameModificationPeriod === Animation.BEFORE) {
             evt.modifyGameState(); // Modify immediately if the event queue is empty (Which will almost always be the case unless there is lag on the opponent's side in passing actions to you)
             evt.gameModificationFrame = -1; // Set to a frame that will never be reached
-        } this.eventQueue.add(evt);
+        }
+        this.eventQueue.add(evt);
     }
 
     /**
