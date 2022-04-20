@@ -2,6 +2,7 @@
  * Wrapper class for actions like attacking and moving to generify code structure
  */
 import {CARD_ACTIONS, ROWS} from "../../constants/constants";
+import {displayRow, flipField} from "../graphics/classifiedSketch";
 
 export class CardAction {
 
@@ -46,15 +47,22 @@ export class CardAction {
 }
 
 export class Attack extends CardAction {
+    static PLAYER = {col: null, row: null};
     constructor() {
         super((card) => {
                 const game = card.game;
                 let locations = [];
+                // Both players get to attack the other player when the card has range to attack what _appears to them_ as row index -1
+                const playerRow = displayRow(-1, game);
+                let lowBound = Math.min(playerRow, 0), highBound = Math.max(playerRow, ROWS - 1);
+
                 for (let direction = -1; direction <= 1; direction += 2) {
                     for (let dist = 1; dist <= card.range; dist++) {
                         const currRow = card.row + dist * direction;
-                        if (currRow < 0 || currRow >= ROWS) break;
-                        if (game.field[card.col][currRow] && game.field[card.col][currRow].user !== card.user) {
+                        if (currRow < lowBound || currRow > highBound) break;
+                        if (currRow === playerRow) {
+                            locations.push(Attack.PLAYER);
+                        } else if (game.field[card.col][currRow] && game.field[card.col][currRow].user !== card.user) {
                             locations.push({col: card.col, row: currRow});
                             break;
                         }

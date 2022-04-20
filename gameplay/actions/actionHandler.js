@@ -44,7 +44,7 @@ export class ActionHandler {
     }
 
     pushEvent(evt) {
-        if (this.eventQueue.isEmpty()) {
+        if (this.eventQueue.isEmpty() && evt.gameModificationPeriod === Animation.BEFORE) {
             evt.modifyGameState(); // Modify immediately if the event queue is empty (Which will almost always be the case unless there is lag on the opponent's side in passing actions to you)
             evt.gameModificationFrame = -1; // Set to a frame that will never be reached
         } this.eventQueue.add(evt);
@@ -78,8 +78,7 @@ export class ActionHandler {
         let modifyGameState;
         switch (action.type) {
             case ACTIONS.gameStart: {
-                modifyGameState = () => {}; // Null action
-                break;
+                return; // Default beginning action, has no associated side-effects
             }
             case ACTIONS.switchTurn: {
                 modifyGameState = () => this.game.handOverTurn(action.user);
