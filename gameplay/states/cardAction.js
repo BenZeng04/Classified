@@ -94,7 +94,6 @@ export class Move extends CardAction {
                         locations.push({col: card.col, row: currRow});
                     }
                 }
-                console.log(locations)
                 return locations;
             }, (card, col, row) => {
                 card.relocate(col, row);

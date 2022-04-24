@@ -32,6 +32,7 @@ const handDivider = gridDividerSeparation +
     (gridOffset * 2 + (maxCardsPerRow - 1) * cardSeparation + maxCardsPerRow * cardSize);
 
 const actionButtonSize = gridTileSize / 2;
+const iconSize = 36;
 
 export function flipField(game) {
     return game.self !== game.firstPlayer;
@@ -182,7 +183,6 @@ export class ClassifiedRenderer {
                 p5.strokeWeight(4);
                 p5.ellipse(x, y + cardSize / 2 - gridWidth, moneyDisplaySize, moneyDisplaySize);
 
-                const iconSize = 36;
                 const bottomOfName = (nameHeight) / 2 - nameOffset;
                 const topOfEllipse = cardSize / 2 - gridWidth - moneyDisplaySize / 2;
                 const downOffset = (bottomOfName + topOfEllipse) / 2;
@@ -358,6 +358,11 @@ export class ClassifiedSketch {
         icons.mvt = p5.loadImage("https://media.discordapp.net/attachments/746934121623978186/888437015354425354/MVMT.png");
         icons.rng = p5.loadImage("https://media.discordapp.net/attachments/746934121623978186/888437037282263060/RNG.png");
         icons.font = p5.loadFont('https://fontsfree.net//wp-content/fonts/basic/sans-serif/FontsFree-Net-Segoe-UI-Bold.ttf');
+
+        icons.hp.resize(iconSize, iconSize);
+        icons.atk.resize(iconSize, iconSize);
+        icons.mvt.resize(iconSize, iconSize);
+        icons.rng.resize(iconSize, iconSize);
     }
 
     setup(p5, canvasParentRef) {
