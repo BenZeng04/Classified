@@ -33,6 +33,8 @@ const handDivider = gridDividerSeparation +
 
 const actionButtonSize = gridTileSize / 2;
 const iconSize = 36;
+const cardDescriptionWidth = 3 * gridTileSize;
+const cardDescriptionHeight = 2 * gridTileSize;
 
 export function flipField(game) {
     return game.self !== game.firstPlayer;
@@ -142,6 +144,64 @@ export class ClassifiedRenderer {
                 p5.rect(offsetStartX + gridTileSize * col, offsetStartY, gridWidth, gridTileSize * ROWS + gridWidth);
             }
         };
+        p5.hpBar = (maxHP, currHP, cash, midY, isFirstPlayer, text) => {
+            const iconSize = 60;
+            p5.rectMode(p5.CENTER);
+            const midX = gridOffset + (gridTileSize * COLUMNS) / 2;
+            const defWidth = gridTileSize * 3;
+            const defHeight = (height - gridTileSize * ROWS) / 4;
+
+            // Displaying the HP Bar itself
+            p5.noStroke();
+            const fill = isFirstPlayer? '#3983c7' : '#e36767';
+            const empty = isFirstPlayer? '#133759' : '#772222';
+
+            p5.fill(fill);
+            p5.rect(midX, midY, defWidth, defHeight);
+
+            p5.fill(empty);
+            const coverWidth = defWidth * currHP / maxHP;
+            p5.rect(midX + (coverWidth) / 2, midY, defWidth - coverWidth, defHeight)
+
+            p5.strokeWeight(4);
+            p5.stroke(255);
+            p5.noFill();
+            p5.rect(midX, midY, defWidth, defHeight);
+
+            // Displaying the Heart Icon
+            const iconOffset = (iconSize / 2 + 5);
+            p5.imageMode(p5.CENTER);
+            p5.image(icons.hp, midX - defWidth / 2 - iconOffset, midY, iconSize, iconSize)
+
+            p5.textAlign(p5.CENTER, p5.CENTER);
+            p5.shadowText(`${currHP}`, midX - defWidth / 2 - iconOffset, midY - 3, 22)
+
+            p5.rectMode(p5.CENTER);
+
+            // Displaying the player's cash
+            p5.strokeWeight(2);
+            p5.colour(127, 127);
+            p5.rect(midX + defWidth / 2 + iconOffset, midY, iconSize, iconSize, 5);
+
+            p5.colour('#ffeabd', 'rgba(255,211,25,0.7)');
+            p5.rect(midX + defWidth / 2 + iconOffset, midY, iconSize, iconSize, 5);
+
+            p5.textAlign(p5.CENTER, p5.CENTER);
+            p5.shadowText(`$${cash}`, midX + defWidth / 2 + iconOffset, midY, 26);
+
+            // Displaying additional vanity text
+            p5.textAlign(p5.CENTER, p5.CENTER);
+            p5.shadowText(text, midX, midY, 28);
+        };
+        p5.verticalDivider = (dividerX) => {
+            p5.strokeWeight(5);
+
+            p5.stroke(127);
+            p5.line(dividerX + shadowOffset.normal, gridOffset + shadowOffset.normal, dividerX + shadowOffset.normal, height - gridOffset + shadowOffset.normal);
+
+            p5.stroke('#ffffff');
+            p5.line(dividerX, gridOffset, dividerX, height - gridOffset);
+        }
         p5.displayCard = /**
          *
          * @param {{name:string,attack:number,health:number,movement:number,range:number,cost:number,owner:string,col:number,row:number}} card
@@ -200,6 +260,24 @@ export class ClassifiedRenderer {
                 p5.shadowText(card.range, x + (gridTileSize * 3 / 8), y + downOffset, nameSize);
         }
         /**
+         * Displays the rectangular box containing a card's description, centered at (x, y)
+         * @param card
+         * @param x
+         * @param y
+         */
+        p5.displayCardDescription = (card, x, y) => {
+            p5.rectMode(p5.CENTER);
+            p5.textAlign(p5.CENTER, p5.CENTER);
+            p5.fill(100, 100);
+            p5.stroke(255);
+
+            p5.strokeWeight(4);
+            p5.rect(x, y, cardDescriptionWidth, cardDescriptionHeight);
+
+            p5.fill(100, 190);
+            p5.shadowText(card.description, x, y, 16, cardDescriptionWidth);
+        }
+        /**
          * Actions => Moving, Attacking
          * @param {Card}card
          */
@@ -234,66 +312,15 @@ export class ClassifiedRenderer {
             p5.stroke(fill);
             p5.ellipse(coordinate.x, coordinate.y, gridTileSize * 4 / 5, gridTileSize * 4 / 5);
         }
-        p5.displayCardOnField = (card, col, row, user, highlight = false) => {
+        p5.displayCardOnField = (card, col, row, firstPlayer, highlight = false) => {
             // Returns the centre of a card on the field
             const coordinate = fieldPositionToCoordinate(col, row);
-            const colour = card.user === user ? 'rgba(0,0,255,0.6)' : 'rgba(255,0,0,0.6)';
+            const colour = card.user === firstPlayer ? 'rgba(0,0,255,0.6)' : 'rgba(255,0,0,0.6)';
             p5.displayCard(card, coordinate.x, coordinate.y, colour, highlight);
         }
-        p5.hpBar = (maxHP, currHP, cash, midY, fill, empty, text) => {
-            const iconSize = 60;
-            p5.rectMode(p5.CENTER);
-            const midX = gridOffset + (gridTileSize * COLUMNS) / 2;
-            const defWidth = gridTileSize * 3;
-            const defHeight = (height - gridTileSize * ROWS) / 4;
-
-            // Displaying the HP Bar itself
-            p5.noStroke();
-            p5.fill(fill);
-            p5.rect(midX, midY, defWidth, defHeight);
-
-            p5.fill(empty);
-            const coverWidth = defWidth * currHP / maxHP;
-            p5.rect(midX + (coverWidth) / 2, midY, defWidth - coverWidth, defHeight)
-
-            p5.strokeWeight(4);
-            p5.stroke(255);
-            p5.noFill();
-            p5.rect(midX, midY, defWidth, defHeight);
-
-            // Displaying the Heart Icon
-            const iconOffset = (iconSize / 2 + 5);
-            p5.imageMode(p5.CENTER);
-            p5.image(icons.hp, midX - defWidth / 2 - iconOffset, midY, iconSize, iconSize)
-
-            p5.textAlign(p5.CENTER, p5.CENTER);
-            p5.shadowText(`${currHP}`, midX - defWidth / 2 - iconOffset, midY - 3, 22)
-
-            p5.rectMode(p5.CENTER);
-
-            // Displaying the player's cash
-            p5.strokeWeight(2);
-            p5.colour(127, 127);
-            p5.rect(midX + defWidth / 2 + iconOffset, midY, iconSize, iconSize, 5);
-
-            p5.colour('#ffeabd', 'rgba(255,211,25,0.7)');
-            p5.rect(midX + defWidth / 2 + iconOffset, midY, iconSize, iconSize, 5);
-
-            p5.textAlign(p5.CENTER, p5.CENTER);
-            p5.shadowText(`$${cash}`, midX + defWidth / 2 + iconOffset, midY, 26);
-
-            // Displaying additional vanity text
-            p5.textAlign(p5.CENTER, p5.CENTER);
-            p5.shadowText(text, midX, midY, 28);
-        };
-        p5.verticalDivider = (dividerX) => {
-            p5.strokeWeight(5);
-
-            p5.stroke(127);
-            p5.line(dividerX + shadowOffset.normal, gridOffset + shadowOffset.normal, dividerX + shadowOffset.normal, height - gridOffset + shadowOffset.normal);
-
-            p5.stroke('#ffffff');
-            p5.line(dividerX, gridOffset, dividerX, height - gridOffset);
+        p5.displaySelectedCard = (card, col, row, user) => {
+            if (card.display) p5.displayCardOnField(card, col, row, user, true)
+            p5.displayCardDescription(card, gridDividerSeparation + (COLUMNS / 2) * gridTileSize, (ROWS + 1) / 2 * gridTileSize + (height - gridTileSize * ROWS) / 2);
         }
         p5.displayCardInHand = (card, index, cash) => {
             const coordinate = handIndexToCoordinate(index);
@@ -303,6 +330,7 @@ export class ClassifiedRenderer {
         p5.displayDraggingCard = (card, index, offsetX, offsetY) => {
             const coordinate = handIndexToCoordinate(index);
             p5.displayCard(card, coordinate.x + offsetX, coordinate.y + offsetY, 'rgba(115,115,115,0.6)', true);
+            p5.displayCardDescription(card, coordinate.x + offsetX, coordinate.y + offsetY + cardDescriptionHeight / 2 + gridTileSize * 3 / 4);
         }
         p5.effectiveBorder = () => {
             p5.rectMode(p5.CORNER);
@@ -396,9 +424,11 @@ export class ClassifiedSketch {
                 }
             }
         }
+        // Display card selected on field
         if (this.clickState.type === CLICK_STATES.cardSelected) {
-            const c = this.game.field[this.clickState.col][this.clickState.row];
-            if (c.display) p5.displayCardOnField(c, this.clickState.col, displayRow(this.clickState.row, this.game), this.game.firstPlayer, true)
+            let c = this.game.field[this.clickState.col][this.clickState.row];
+            p5.displaySelectedCard(this.game.field[this.clickState.col][this.clickState.row], this.clickState.col, displayRow(this.clickState.row, this.game), this.game.firstPlayer);
+            // Display card actions
             if (c.user === this.game.self) {
                 if (this.clickState.action === CARD_ACTIONS.none) p5.displayCardActions(c);
                 else {
@@ -414,10 +444,10 @@ export class ClassifiedSketch {
         }
 
         p5.hpBar(DEFAULT_HP, this.game.hp[this.game.self], this.game.cash[this.game.self],
-            gridTileSize * ROWS + (height - gridTileSize * ROWS) * (3 / 4), '#3983c7', '#133759'
+            gridTileSize * ROWS + (height - gridTileSize * ROWS) * (3 / 4), this.game.self === this.game.firstPlayer
             , "You");
         p5.hpBar(DEFAULT_HP, this.game.hp[this.game.opp], this.game.cash[this.game.opp],
-            (height - gridTileSize * ROWS) * (1 / 4), '#e36767', '#772222'
+            (height - gridTileSize * ROWS) * (1 / 4), this.game.opp === this.game.firstPlayer
             , "Opponent");
         p5.verticalDivider(gridDividerSeparation);
         p5.verticalDivider(handDivider);

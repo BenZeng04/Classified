@@ -15,6 +15,9 @@ A handy stack list for implementations per new action:
 TODO: Server side: handle if performing the action is possible or not using rules
  */
 
+/**
+ * Responsible for the processing, creation and rendering of in-game actions / animations.
+ */
 export class ActionHandler {
 
     constructor(game) {
