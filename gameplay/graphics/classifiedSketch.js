@@ -367,6 +367,7 @@ export class ClassifiedRenderer {
 
 /**
  * Highest level class for all graphical user interface strictly related to gameplay.
+ * Responsible for forwarding user input to the Action Handler, but does not modify the game directly ever.
  */
 export class ClassifiedSketch {
 

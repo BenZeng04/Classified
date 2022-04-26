@@ -57,6 +57,7 @@ export class Attack extends CardAction {
                 let lowBound = Math.min(playerRow, 0), highBound = Math.max(playerRow, ROWS - 1);
 
                 for (let direction = -1; direction <= 1; direction += 2) {
+                    // Vertical attack
                     for (let dist = 1; dist <= card.range; dist++) {
                         const currRow = card.row + dist * direction;
                         if (currRow < lowBound || currRow > highBound) break;
@@ -64,6 +65,15 @@ export class Attack extends CardAction {
                             locations.push({col: card.col, row: currRow});
                         } else if (game.field[card.col][currRow] && game.field[card.col][currRow].user !== card.user) {
                             locations.push({col: card.col, row: currRow});
+                            break;
+                        }
+                    }
+                    // Horizontal attack
+                    for (let dist = 1; dist <= card.range; dist++) {
+                        const currCol = card.col + dist * direction;
+                        if (currCol < 0 || currCol >= COLUMNS) break;
+                        if (game.field[currCol][card.row] && game.field[currCol][card.row].user !== card.user) {
+                            locations.push({col: currCol, row: card.row});
                             break;
                         }
                     }

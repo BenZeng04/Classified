@@ -73,8 +73,8 @@ export class ActionHandler {
     }
 
     /**
-     * Method responsible for updating the gameState accordingly during any form of update to the database (either by you or the opponent) and subsequently
-     * creating an animation along with it.
+     * Method responsible for calling the appropriate GameState update function accordingly, during any form of update
+     * to the database (either pushed by you or the opponent) and subsequently creating an animation along with it.
      * @param action The action information
      * @param preload Whether the action is preloaded (already happened and user is refreshing game tab) - this will determine whether to play an animation or not
      */
