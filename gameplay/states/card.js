@@ -5,7 +5,18 @@ import {Attack, CardAction, Move} from "./cardAction";
 import {CARD_ACTIONS} from "../../constants/constants";
 
 export class Card {
-
+    static makeCard(name, description, attack, health, movement, range, cost, id) {
+        const dict = new Map([
+        ]);
+        let cardClass;
+        if (dict.has(name)) {
+            cardClass = dict.get(name);
+        } else {
+            cardClass = Card;
+        }
+        return new(cardClass)(name, description, attack, health, movement, range, cost, id);
+        // https://stackoverflow.com/questions/49042459/how-to-instantiate-a-class-from-a-string-in-javascript
+    }
     initActions() {
         this.actions = {};
         // TODO: Generify so that different actions are better supported
@@ -16,6 +27,17 @@ export class Card {
         this.display = true;
     }
 
+    /**
+     * Do not use the constructor to instantiate cards. Use the static makeCard builder instead.
+     * @param name
+     * @param description
+     * @param attack
+     * @param health
+     * @param movement
+     * @param range
+     * @param cost
+     * @param id
+     */
     constructor(name, description, attack, health, movement, range, cost, id) {
         this._name = name;
         this._description = description;
@@ -121,7 +143,7 @@ export class Card {
     }
 
     clone() {
-        return new Card(this.name, this.description, this.attack, this.health, this.movement, this.range, this.cost, this.id);
+        return Card.makeCard(this.name, this.description, this.attack, this.health, this.movement, this.range, this.cost, this.id);
     }
 
     place(game, user, col, row) {

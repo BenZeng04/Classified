@@ -58,7 +58,7 @@ export class GameLoader {
         const collection = {};
         for (const cardID in data) {
             const current = data[cardID];
-            collection[cardID] = new Card(
+            collection[cardID] = Card.makeCard(
                 current.name,
                 current.description,
                 current.attack,
